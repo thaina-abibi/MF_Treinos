@@ -175,7 +175,7 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:.85rem;font-weight:
 .auth-card .entry-copy{gap:16px;width:100%;max-width:380px}
 .auth-card h2{color:#F2B72E}
 .auth-card p{font-size:1rem}
-.auth-card p b{color:#F6F2E8}
+.auth-card p b{color:#F6F2E8;white-space:nowrap}
 .auth-form{display:flex;flex-direction:column;gap:14px;width:100%}
 .auth-form .btn{width:100%;margin-top:4px}
 .auth-card input{background:rgba(255,255,255,.07);color:#F6F2E8;border-color:rgba(246,242,232,.18)}
@@ -186,14 +186,8 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:.85rem;font-weight:
 .auth-card .linkbtn{color:#F2B72E;padding-left:0}
 .auth-card .btn.ghost{color:#F6F2E8;box-shadow:inset 0 0 0 1.5px rgba(246,242,232,.3)}
 .auth-erro{background:rgba(255,138,128,.14);color:#FFB4AB;border-radius:12px;padding:.6rem .8rem;font-size:.92rem}
-.qr-box{background:#FFFFFF;border-radius:18px;padding:14px;align-self:flex-start}
 .auth-card .hero-bar .pl{animation:none}
-.so-celular{display:none}
-.qr-box{min-width:212px;min-height:212px}
-.qr-box #qr img,.qr-box #qr canvas{display:block}
-.chave{font-size:.88rem}
-.chave code{display:block;margin-top:4px;color:#F6F2E8;background:rgba(255,255,255,.07);border-radius:8px;padding:.35rem .55rem;font-size:.92rem;letter-spacing:.06em;word-break:break-all}
-@media (max-width:760px){.auth-card .hero-bar{display:none}.auth-card .so-celular{display:inline-flex;width:100%}}
+@media (max-width:760px){.auth-card .hero-bar{display:none}}
 @media (max-width:760px){
   .entry-card{grid-template-columns:1fr;min-height:0;border-radius:24px}
   .hero-bar{order:-1;max-width:320px}
@@ -214,11 +208,11 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:.85rem;font-weight:
   <div id="app"></div>
 </div>
 <div id="toast" class="toast" role="status" hidden></div>
+<div id="recaptcha"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut,sendEmailVerification,sendPasswordResetEmail,multiFactor,getMultiFactorResolver,TotpMultiFactorGenerator} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut,sendEmailVerification,sendPasswordResetEmail,multiFactor,getMultiFactorResolver,RecaptchaVerifier,PhoneAuthProvider,PhoneMultiFactorGenerator} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {getDatabase,ref,set,remove,onValue} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
 /* ====== CONFIGURAÇÃO DO FIREBASE ======
@@ -522,7 +516,6 @@ function render(){
   Array.prototype.forEach.call(app.querySelectorAll('input[id]'),function(el){
     if(el.id in saved&&(el.id==='novo-nome'||el.id==='novo-obj'||/^(lg|mfa|en)-/.test(el.id))&&el.value!==saved[el.id])el.value=saved[el.id];
   });
-  if(S.auth==='enroll'&&S.qrUrl&&window.QRCode&&$('#qr')){try{new QRCode($('#qr'),{text:S.qrUrl,width:184,height:184,colorDark:'#14213D',colorLight:'#FFFFFF'});}catch(e){}}
   if(S.focus){var f=$(S.focus);if(f)f.focus();S.focus=null;}
   else if(active){var el=document.getElementById(active);if(el){el.focus();if(selS!=null){try{el.setSelectionRange(selS,selE);}catch(e){}}}}
 }
@@ -561,6 +554,8 @@ document.addEventListener('click',function(ev){
     case 'esqueci':esqueci();return;
     case 'jaVerifiquei':jaVerifiquei();return;
     case 'reenviar':reenviar();return;
+    case 'reenviarSms':enviarSmsLogin();return;
+    case 'trocarNumero':S.enrollStep='phone';S.verificationId=null;S.authErr='';break;
   }
   render();
 });
@@ -576,9 +571,9 @@ document.addEventListener('keydown',function(ev){
 });
 
 /* ---------- autenticação ---------- */
-Object.assign(S,{auth:'loading',authErr:'',authBusy:false,resolver:null,totpSecret:null,qrUrl:null,verifEnviado:false,dbErro:false});
+Object.assign(S,{auth:'loading',authErr:'',authBusy:false,resolver:null,verificationId:null,enrollStep:'phone',telefone:'',dicaTel:'',verifEnviado:false,dbErro:false});
 var CONFIG_OK=firebaseConfig.apiKey&&firebaseConfig.apiKey.indexOf('COLE_')!==0;
-var app=null,auth=null,rtdb=null,unsubs=[];
+var app=null,auth=null,rtdb=null,unsubs=[],recaptcha=null;
 var HERO='<div class="hero-bar" aria-hidden="true"><svg viewBox="0 0 500 200"><rect x="10" y="94" width="480" height="12" rx="6" fill="var(--steel)"/><rect x="140" y="86" width="12" height="28" rx="3" fill="var(--ink)"/><rect x="348" y="86" width="12" height="28" rx="3" fill="var(--ink)"/><rect class="pl l1" style="--from:-30px" x="118" y="25" width="20" height="150" rx="6" fill="var(--p-red)"/><rect class="pl l2" style="--from:-30px" x="94" y="25" width="20" height="150" rx="6" fill="var(--p-blue)"/><rect class="pl l3" style="--from:-30px" x="72" y="40" width="18" height="120" rx="6" fill="var(--p-yellow)"/><rect class="pl l4" style="--from:-30px" x="54" y="54" width="14" height="92" rx="6" fill="var(--p-green)"/><rect class="pl r1" style="--from:30px" x="362" y="25" width="20" height="150" rx="6" fill="var(--p-red)"/><rect class="pl r2" style="--from:30px" x="386" y="25" width="20" height="150" rx="6" fill="var(--p-blue)"/><rect class="pl r3" style="--from:30px" x="410" y="40" width="18" height="120" rx="6" fill="var(--p-yellow)"/><rect class="pl r4" style="--from:30px" x="432" y="54" width="14" height="92" rx="6" fill="var(--p-green)"/></svg></div>';
 
 function msgErro(e){
@@ -590,17 +585,27 @@ function msgErro(e){
     'auth/invalid-email':'E-mail inválido.',
     'auth/user-disabled':'Esta conta foi desativada.',
     'auth/too-many-requests':'Muitas tentativas. Aguarde alguns minutos e tente de novo.',
-    'auth/invalid-verification-code':'Código inválido. Confira o Google Authenticator e tente de novo.',
+    'auth/invalid-verification-code':'Código inválido. Confira o SMS e tente de novo.',
+    'auth/code-expired':'O código expirou. Peça um novo SMS.',
     'auth/missing-code':'Digite o código de 6 dígitos.',
-    'auth/unverified-email':'Confirme seu e-mail antes de ativar o Authenticator.',
+    'auth/invalid-phone-number':'Número de celular inválido. Use DDD + número, por exemplo (12) 99999-9999.',
+    'auth/missing-phone-number':'Digite o número do celular.',
+    'auth/second-factor-already-in-use':'Este celular já está cadastrado nesta conta.',
+    'auth/quota-exceeded':'Limite de envio de SMS atingido. Tente mais tarde.',
+    'auth/captcha-check-failed':'A verificação de segurança falhou. Recarregue a página e tente de novo.',
+    'auth/invalid-app-credential':'A verificação de segurança falhou. Recarregue a página e tente de novo.',
+    'auth/billing-not-enabled':'O envio de SMS exige o plano Blaze no Firebase.',
+    'auth/operation-not-allowed':'A verificação por SMS ainda não foi ativada no projeto Firebase.',
+    'auth/admin-restricted-operation':'O envio de SMS para este número não está permitido nas configurações do Firebase.',
+    'auth/unverified-email':'Confirme seu e-mail antes de cadastrar o celular.',
     'auth/requires-recent-login':'Por segurança, entre novamente.',
-    'auth/operation-not-allowed':'O Authenticator (TOTP) ainda não foi ativado no projeto Firebase.',
     'auth/network-request-failed':'Sem conexão. Verifique a internet.'
   };
   return m[c]||('Não foi possível concluir ('+(c||'erro desconhecido')+').');
 }
 function erroHtml(){return S.authErr?'<p class="auth-erro" role="alert">'+esc(S.authErr)+'</p>':'';}
 function btnSubmit(txt){return '<button type="submit" class="btn gold"'+(S.authBusy?' disabled':'')+'>'+(S.authBusy?'Aguarde…':txt)+'</button>';}
+function campoCodigo(id){return '<label class="f">Código do SMS<input id="'+id+'" class="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000"></label>';}
 function authView(){
   var c;
   if(S.auth==='loading')c='<p>Carregando…</p>';
@@ -611,11 +616,18 @@ function authView(){
     '<label class="f">Senha<input id="lg-senha" type="password" autocomplete="current-password"></label>'+
     erroHtml()+btnSubmit('Entrar')+'</form>'+
     '<button class="linkbtn" data-act="esqueci">Esqueci minha senha</button>';
-  else if(S.auth==='mfa')c='<h2>Código do Authenticator</h2><p>Abra o Google Authenticator e digite o código de 6 dígitos de MF Treinos.</p>'+
-    '<form class="auth-form" data-form="mfa" novalidate>'+
-    '<label class="f">Código<input id="mfa-code" class="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000"></label>'+
-    erroHtml()+btnSubmit('Confirmar código')+'</form>'+
-    '<button class="linkbtn" data-act="sair">Usar outra conta</button>';
+  else if(S.auth==='mfa'){
+    c='<h2>Confirme pelo SMS</h2>';
+    if(S.verificationId){
+      c+='<p>Enviamos um código para o celular <b>'+esc(S.dicaTel)+'</b>.</p>'+
+        '<form class="auth-form" data-form="mfa" novalidate>'+campoCodigo('mfa-code')+erroHtml()+btnSubmit('Confirmar código')+'</form>'+
+        '<button class="linkbtn" data-act="reenviarSms">Reenviar SMS</button>';
+    } else {
+      c+='<p>'+(S.authBusy?'Enviando o código para '+esc(S.dicaTel)+'…':'Não foi possível enviar o SMS.')+'</p>'+erroHtml()+
+        (S.authBusy?'':'<button class="btn gold" data-act="reenviarSms">Tentar enviar de novo</button>');
+    }
+    c+='<button class="linkbtn" data-act="sair">Usar outra conta</button>';
+  }
   else if(S.auth==='verify'){
     var em=auth&&auth.currentUser?auth.currentUser.email:'';
     c='<h2>Confirme seu e-mail</h2><p>Enviamos um link de confirmação para <b>'+esc(em)+'</b>. Abra o link e depois volte aqui.</p>'+erroHtml()+
@@ -623,15 +635,17 @@ function authView(){
     '<button class="linkbtn" data-act="sair">Sair</button>';
   }
   else if(S.auth==='enroll'){
-    c='<h2>Ative o Google Authenticator</h2><p>No Google Authenticator, toque em + e escaneie o código. Depois digite o código de 6 dígitos que aparecer.</p>';
-    if(S.qrUrl){
-      c+='<a class="btn ghost so-celular" href="'+esc(S.qrUrl)+'">Adicionar no Authenticator deste celular</a>'+
-        (window.QRCode?'<div class="qr-box"><div id="qr" aria-label="QR code para o Google Authenticator"></div></div>':'')+
-        '<p class="chave">Não consegue escanear? Digite esta chave no app: <code>'+esc(S.totpSecret.secretKey)+'</code></p>'+
-        '<form class="auth-form" data-form="enroll" novalidate>'+
-        '<label class="f">Código<input id="en-code" class="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000"></label>'+
-        erroHtml()+btnSubmit('Ativar Authenticator')+'</form>';
-    } else c+=(S.authErr?erroHtml():'<p>Gerando código…</p>');
+    c='<h2>Cadastre seu celular</h2>';
+    if(S.enrollStep==='phone'){
+      c+='<p>Nos próximos acessos, vamos enviar um código por SMS para este número.</p>'+
+        '<form class="auth-form" data-form="enrollPhone" novalidate>'+
+        '<label class="f">Celular com DDD<input id="en-tel" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="(12) 99999-9999"></label>'+
+        erroHtml()+btnSubmit('Enviar código')+'</form>';
+    } else {
+      c+='<p>Enviamos um código para <b>'+esc(S.telefone)+'</b>. Digite abaixo para concluir.</p>'+
+        '<form class="auth-form" data-form="enrollCode" novalidate>'+campoCodigo('en-code')+erroHtml()+btnSubmit('Confirmar celular')+'</form>'+
+        '<button class="linkbtn" data-act="trocarNumero">Trocar número</button>';
+    }
     c+='<button class="linkbtn" data-act="sair">Sair</button>';
   }
   return '<section class="entry"><div class="entry-card auth-card"><div class="entry-copy">'+c+'</div>'+HERO+'</div></section>';
@@ -657,6 +671,23 @@ function pararDados(){
 }
 function markLoaded(k){S.loaded[k]=true;if(S.loaded.alunos&&S.loaded.treinos&&S.loaded.progresso)S.ready=true;}
 
+/* reCAPTCHA invisível exigido pelo Firebase para enviar SMS */
+function pegarRecaptcha(){
+  if(!recaptcha)recaptcha=new RecaptchaVerifier(auth,'recaptcha',{size:'invisible'});
+  return recaptcha;
+}
+function resetarRecaptcha(){try{if(recaptcha)recaptcha.clear();}catch(e){}recaptcha=null;var el=$('#recaptcha');if(el)el.innerHTML='';}
+function normalizarTel(v){
+  var d=String(v||'').replace(/\D/g,'');
+  if(d.indexOf('55')===0&&(d.length===12||d.length===13))return '+'+d;
+  if(d.length===10||d.length===11)return '+55'+d;
+  return null;
+}
+function formatarTel(e164){
+  var d=e164.replace(/^\+55/,'');
+  return d.length===11?'('+d.slice(0,2)+') '+d.slice(2,7)+'-'+d.slice(7):'('+d.slice(0,2)+') '+d.slice(2,6)+'-'+d.slice(6);
+}
+
 function avaliarUsuario(user){
   if(!user){pararDados();if(S.auth!=='mfa'){S.auth='login';}render();return;}
   if(multiFactor(user).enrolledFactors.length){S.auth='ok';S.authErr='';iniciarDados();render();return;}
@@ -666,42 +697,55 @@ function avaliarUsuario(user){
     if(!S.verifEnviado){S.verifEnviado=true;sendEmailVerification(user).catch(function(e){S.authErr=msgErro(e);render();});}
     render();return;
   }
-  prepararCadastro(user);
-}
-async function prepararCadastro(user){
-  S.auth='enroll';S.qrUrl=null;S.totpSecret=null;S.authErr='';render();
-  try{
-    var session=await multiFactor(user).getSession();
-    var sec=await TotpMultiFactorGenerator.generateSecret(session);
-    S.totpSecret=sec;S.qrUrl=sec.generateQrCodeUrl(user.email,'MF Treinos');S.focus='#en-code';
-  }catch(e){
-    if(e&&e.code==='auth/requires-recent-login'){await signOut(auth);S.auth='login';}
-    S.authErr=msgErro(e);
-  }
-  render();
+  S.auth='enroll';S.enrollStep='phone';S.verificationId=null;S.authErr='';S.focus='#en-tel';render();
 }
 async function fazerLogin(){
   var email=($('#lg-email').value||'').trim(),senha=$('#lg-senha').value||'';
   if(!email||!senha){S.authErr='Preencha e-mail e senha.';render();return;}
   S.authBusy=true;S.authErr='';render();
-  try{await signInWithEmailAndPassword(auth,email,senha);}
+  try{await signInWithEmailAndPassword(auth,email,senha);S.authBusy=false;render();}
   catch(e){
-    if(e&&e.code==='auth/multi-factor-auth-required'){S.resolver=getMultiFactorResolver(auth,e);S.auth='mfa';S.focus='#mfa-code';}
-    else S.authErr=msgErro(e);
+    S.authBusy=false;
+    if(e&&e.code==='auth/multi-factor-auth-required'){
+      S.resolver=getMultiFactorResolver(auth,e);S.auth='mfa';enviarSmsLogin();return;
+    }
+    S.authErr=msgErro(e);render();
   }
+}
+async function enviarSmsLogin(){
+  var hint=S.resolver&&S.resolver.hints.find(function(h){return h.factorId===PhoneMultiFactorGenerator.FACTOR_ID;});
+  if(!hint){S.authErr='Esta conta não tem celular cadastrado.';render();return;}
+  S.dicaTel=hint.phoneNumber||'cadastrado';S.verificationId=null;S.authBusy=true;S.authErr='';render();
+  try{
+    S.verificationId=await new PhoneAuthProvider(auth).verifyPhoneNumber({multiFactorHint:hint,session:S.resolver.session},pegarRecaptcha());
+    S.focus='#mfa-code';
+  }catch(e){S.authErr=msgErro(e);resetarRecaptcha();}
   S.authBusy=false;render();
 }
 function lerCodigo(id){return (($(id)||{}).value||'').replace(/\D/g,'');}
 async function confirmarMfa(){
   var code=lerCodigo('#mfa-code');
   if(code.length!==6){S.authErr='Digite os 6 dígitos do código.';render();return;}
-  var hint=S.resolver&&S.resolver.hints.find(function(h){return h.factorId===TotpMultiFactorGenerator.FACTOR_ID;});
-  if(!hint){S.authErr='Esta conta não tem o Authenticator configurado.';render();return;}
   S.authBusy=true;S.authErr='';render();
   try{
-    await S.resolver.resolveSignIn(TotpMultiFactorGenerator.assertionForSignIn(hint.uid,code));
-    S.resolver=null;
+    await S.resolver.resolveSignIn(PhoneMultiFactorGenerator.assertion(PhoneAuthProvider.credential(S.verificationId,code)));
+    S.resolver=null;S.verificationId=null;resetarRecaptcha();
   }catch(e){S.authErr=msgErro(e);}
+  S.authBusy=false;render();
+}
+async function enviarSmsCadastro(){
+  var tel=normalizarTel(($('#en-tel')||{}).value);
+  if(!tel){S.authErr='Digite o celular com DDD, por exemplo (12) 99999-9999.';render();return;}
+  S.authBusy=true;S.authErr='';render();
+  try{
+    var session=await multiFactor(auth.currentUser).getSession();
+    S.verificationId=await new PhoneAuthProvider(auth).verifyPhoneNumber({phoneNumber:tel,session:session},pegarRecaptcha());
+    S.telefone=formatarTel(tel);S.enrollStep='code';S.focus='#en-code';
+  }catch(e){
+    resetarRecaptcha();
+    if(e&&e.code==='auth/requires-recent-login'){await signOut(auth);S.auth='login';}
+    S.authErr=msgErro(e);
+  }
   S.authBusy=false;render();
 }
 async function confirmarCadastro(){
@@ -709,10 +753,10 @@ async function confirmarCadastro(){
   if(code.length!==6){S.authErr='Digite os 6 dígitos do código.';render();return;}
   S.authBusy=true;S.authErr='';render();
   try{
-    await multiFactor(auth.currentUser).enroll(TotpMultiFactorGenerator.assertionForEnrollment(S.totpSecret,code),'Google Authenticator');
-    S.totpSecret=null;S.qrUrl=null;S.authBusy=false;
+    await multiFactor(auth.currentUser).enroll(PhoneMultiFactorGenerator.assertion(PhoneAuthProvider.credential(S.verificationId,code)),'Celular');
+    S.verificationId=null;S.enrollStep='phone';S.authBusy=false;resetarRecaptcha();
     await signOut(auth);
-    S.auth='login';toast('Authenticator ativado. Entre de novo usando o código.');
+    S.auth='login';toast('Celular cadastrado. Entre de novo para receber o código por SMS.');
   }catch(e){S.authErr=msgErro(e);S.authBusy=false;}
   render();
 }
@@ -736,22 +780,23 @@ async function esqueci(){
   render();
 }
 async function sair(){
-  S.resolver=null;S.totpSecret=null;S.qrUrl=null;S.authErr='';S.verifEnviado=false;
-  pararDados();S.auth=CONFIG_OK?'login':'config';
+  S.resolver=null;S.verificationId=null;S.enrollStep='phone';S.authErr='';S.verifEnviado=false;S.authBusy=false;
+  resetarRecaptcha();pararDados();S.auth=CONFIG_OK?'login':'config';
   try{if(auth)await signOut(auth);}catch(e){}
   render();
 }
 document.addEventListener('submit',function(ev){
   var f=ev.target.dataset&&ev.target.dataset.form;if(!f)return;
   ev.preventDefault();if(S.authBusy)return;
-  if(f==='login')fazerLogin();else if(f==='mfa')confirmarMfa();else if(f==='enroll')confirmarCadastro();
+  if(f==='login')fazerLogin();else if(f==='mfa')confirmarMfa();
+  else if(f==='enrollPhone')enviarSmsCadastro();else if(f==='enrollCode')confirmarCadastro();
 });
 
 /* ---------- boot ---------- */
 loadSession();
 if(!CONFIG_OK){S.auth='config';render();}
 else{
-  app=initializeApp(firebaseConfig);auth=getAuth(app);rtdb=getDatabase(app);
+  app=initializeApp(firebaseConfig);auth=getAuth(app);auth.languageCode='pt-BR';rtdb=getDatabase(app);
   render();
   onAuthStateChanged(auth,avaliarUsuario);
 }
