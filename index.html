@@ -170,6 +170,30 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:.85rem;font-weight:
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--chalk);padding:.75rem 1.25rem;border-radius:999px;font-weight:700;max-width:calc(100% - 32px);z-index:10;box-shadow:0 8px 24px rgba(20,24,30,.25)}
 .loading{padding:60px 0;text-align:center;color:var(--muted)}
 
+
+/* login */
+.auth-card .entry-copy{gap:16px;width:100%;max-width:380px}
+.auth-card h2{color:#F2B72E}
+.auth-card p{font-size:1rem}
+.auth-card p b{color:#F6F2E8}
+.auth-form{display:flex;flex-direction:column;gap:14px;width:100%}
+.auth-form .btn{width:100%;margin-top:4px}
+.auth-card input{background:rgba(255,255,255,.07);color:#F6F2E8;border-color:rgba(246,242,232,.18)}
+.auth-card input:hover{border-color:rgba(246,242,232,.35)}
+.auth-card input:focus{border-color:#F2B72E;background:rgba(255,255,255,.1)}
+.auth-card input::placeholder{color:#8F99B3}
+.auth-card input.code{font-size:1.6rem;font-weight:700;letter-spacing:.35em;text-align:center;font-variant-numeric:tabular-nums}
+.auth-card .linkbtn{color:#F2B72E;padding-left:0}
+.auth-card .btn.ghost{color:#F6F2E8;box-shadow:inset 0 0 0 1.5px rgba(246,242,232,.3)}
+.auth-erro{background:rgba(255,138,128,.14);color:#FFB4AB;border-radius:12px;padding:.6rem .8rem;font-size:.92rem}
+.qr-box{background:#FFFFFF;border-radius:18px;padding:14px;align-self:flex-start}
+.auth-card .hero-bar .pl{animation:none}
+.so-celular{display:none}
+.qr-box{min-width:212px;min-height:212px}
+.qr-box #qr img,.qr-box #qr canvas{display:block}
+.chave{font-size:.88rem}
+.chave code{display:block;margin-top:4px;color:#F6F2E8;background:rgba(255,255,255,.07);border-radius:8px;padding:.35rem .55rem;font-size:.92rem;letter-spacing:.06em;word-break:break-all}
+@media (max-width:760px){.auth-card .hero-bar{display:none}.auth-card .so-celular{display:inline-flex;width:100%}}
 @media (max-width:760px){
   .entry-card{grid-template-columns:1fr;min-height:0;border-radius:24px}
   .hero-bar{order:-1;max-width:320px}
@@ -191,11 +215,24 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:.85rem;font-weight:
 </div>
 <div id="toast" class="toast" role="status" hidden></div>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script type="module">
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut,sendEmailVerification,sendPasswordResetEmail,multiFactor,getMultiFactorResolver,TotpMultiFactorGenerator} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import {getDatabase,ref,set,remove,onValue} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+
+/* ====== CONFIGURAÇÃO DO FIREBASE ======
+   Cole aqui os valores de: Console do Firebase > Configurações do projeto > Seus apps > App da Web > firebaseConfig */
+const firebaseConfig={
+  apiKey:'COLE_SUA_API_KEY',
+  authDomain:'mf-treinos.firebaseapp.com',
+  databaseURL:'https://mf-treinos-default-rtdb.firebaseio.com',
+  projectId:'mf-treinos',
+  appId:'COLE_SEU_APP_ID'
+};
+/* ====================================== */
+
 (function(){
-var FIREBASE_URL='https://mf-treinos-default-rtdb.firebaseio.com';
 var DIAS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 var ORDEM=[1,2,3,4,5,6,0];
 var SUGESTOES=['Agachamento livre','Leg press 45°','Cadeira extensora','Mesa flexora','Stiff','Afundo','Elevação pélvica','Panturrilha em pé','Supino reto','Supino inclinado','Crucifixo','Flexão de braço','Puxada frontal','Remada baixa','Remada curvada','Barra fixa','Desenvolvimento com halteres','Elevação lateral','Rosca direta','Rosca martelo','Tríceps corda','Tríceps testa','Abdominal infra','Prancha','Esteira','Bicicleta ergométrica'];
@@ -313,11 +350,12 @@ function zerar(treinoId){
 /* ---------- views ---------- */
 function header(){
   var right='';
-  if(S.papel){
+  if(S.auth==='ok'&&S.papel){
     right='<div class="seg" role="group" aria-label="Modo">'+
       '<button data-act="papel" data-v="personal" aria-pressed="'+(S.papel==='personal')+'">Personal</button>'+
       '<button data-act="papel" data-v="aluno" aria-pressed="'+(S.papel==='aluno')+'">Aluno</button></div>';
   }
+  if(S.auth==='ok')right='<div class="acts">'+right+'<button class="btn ghost sm" data-act="sair">Sair</button></div>';
   return '<header class="top"><div class="brand"><span class="logo">MF</span>MF Treinos</div>'+right+'</header>';
 }
 function picker(){
@@ -471,14 +509,17 @@ function render(){
   Array.prototype.forEach.call(app.querySelectorAll('input[id]'),function(el){saved[el.id]=el.value;});
   if(active&&document.activeElement.selectionStart!=null){selS=document.activeElement.selectionStart;selE=document.activeElement.selectionEnd;}
   var body;
-  if(!S.ready)body='<div class="loading">Carregando…</div>';
+  if(S.auth!=='ok')body=authView();
+  else if(S.dbErro)body='<section class="panel"><div class="empty"><h2>Sem acesso aos dados</h2><p class="muted">Você entrou, mas o banco recusou o acesso. Confira as regras do Realtime Database no Firebase.</p><button class="btn" data-act="sair">Sair</button></div></section>';
+  else if(!S.ready)body='<div class="loading">Carregando…</div>';
   else if(!S.papel)body=picker();
   else if(S.papel==='personal')body=personal();
   else body=aluno();
   app.innerHTML=header()+body;
   Array.prototype.forEach.call(app.querySelectorAll('input[id]'),function(el){
-    if(el.id in saved&&(el.id==='novo-nome'||el.id==='novo-obj')&&el.value!==saved[el.id])el.value=saved[el.id];
+    if(el.id in saved&&(el.id==='novo-nome'||el.id==='novo-obj'||/^(lg|mfa|en)-/.test(el.id))&&el.value!==saved[el.id])el.value=saved[el.id];
   });
+  if(S.auth==='enroll'&&S.qrUrl&&window.QRCode&&$('#qr')){try{new QRCode($('#qr'),{text:S.qrUrl,width:184,height:184,colorDark:'#14213D',colorLight:'#FFFFFF'});}catch(e){}}
   if(S.focus){var f=$(S.focus);if(f)f.focus();S.focus=null;}
   else if(active){var el=document.getElementById(active);if(el){el.focus();if(selS!=null){try{el.setSelectionRange(selS,selE);}catch(e){}}}}
 }
@@ -513,6 +554,10 @@ document.addEventListener('click',function(ev){
     case 'toggleEx':toggleEx(d.t,d.e);break;
     case 'concluir':concluir(d.t);break;
     case 'zerar':zerar(d.t);break;
+    case 'sair':sair();return;
+    case 'esqueci':esqueci();return;
+    case 'jaVerifiquei':jaVerifiquei();return;
+    case 'reenviar':reenviar();return;
   }
   render();
 });
@@ -527,33 +572,186 @@ document.addEventListener('keydown',function(ev){
   if(ev.key==='Enter'&&(ev.target.id==='novo-nome'||ev.target.id==='novo-obj')){ev.preventDefault();addAluno();}
 });
 
+/* ---------- autenticação ---------- */
+Object.assign(S,{auth:'loading',authErr:'',authBusy:false,resolver:null,totpSecret:null,qrUrl:null,verifEnviado:false,dbErro:false});
+var CONFIG_OK=firebaseConfig.apiKey&&firebaseConfig.apiKey.indexOf('COLE_')!==0;
+var app=null,auth=null,rtdb=null,unsubs=[];
+var HERO='<div class="hero-bar" aria-hidden="true"><svg viewBox="0 0 500 200"><rect x="10" y="94" width="480" height="12" rx="6" fill="var(--steel)"/><rect x="140" y="86" width="12" height="28" rx="3" fill="var(--ink)"/><rect x="348" y="86" width="12" height="28" rx="3" fill="var(--ink)"/><rect class="pl l1" style="--from:-30px" x="118" y="25" width="20" height="150" rx="6" fill="var(--p-red)"/><rect class="pl l2" style="--from:-30px" x="94" y="25" width="20" height="150" rx="6" fill="var(--p-blue)"/><rect class="pl l3" style="--from:-30px" x="72" y="40" width="18" height="120" rx="6" fill="var(--p-yellow)"/><rect class="pl l4" style="--from:-30px" x="54" y="54" width="14" height="92" rx="6" fill="var(--p-green)"/><rect class="pl r1" style="--from:30px" x="362" y="25" width="20" height="150" rx="6" fill="var(--p-red)"/><rect class="pl r2" style="--from:30px" x="386" y="25" width="20" height="150" rx="6" fill="var(--p-blue)"/><rect class="pl r3" style="--from:30px" x="410" y="40" width="18" height="120" rx="6" fill="var(--p-yellow)"/><rect class="pl r4" style="--from:30px" x="432" y="54" width="14" height="92" rx="6" fill="var(--p-green)"/></svg></div>';
+
+function msgErro(e){
+  var c=(e&&e.code)||'';
+  var m={
+    'auth/invalid-credential':'E-mail ou senha incorretos.',
+    'auth/wrong-password':'E-mail ou senha incorretos.',
+    'auth/user-not-found':'E-mail ou senha incorretos.',
+    'auth/invalid-email':'E-mail inválido.',
+    'auth/user-disabled':'Esta conta foi desativada.',
+    'auth/too-many-requests':'Muitas tentativas. Aguarde alguns minutos e tente de novo.',
+    'auth/invalid-verification-code':'Código inválido. Confira o Google Authenticator e tente de novo.',
+    'auth/missing-code':'Digite o código de 6 dígitos.',
+    'auth/unverified-email':'Confirme seu e-mail antes de ativar o Authenticator.',
+    'auth/requires-recent-login':'Por segurança, entre novamente.',
+    'auth/operation-not-allowed':'O Authenticator (TOTP) ainda não foi ativado no projeto Firebase.',
+    'auth/network-request-failed':'Sem conexão. Verifique a internet.'
+  };
+  return m[c]||('Não foi possível concluir ('+(c||'erro desconhecido')+').');
+}
+function erroHtml(){return S.authErr?'<p class="auth-erro" role="alert">'+esc(S.authErr)+'</p>':'';}
+function btnSubmit(txt){return '<button type="submit" class="btn gold"'+(S.authBusy?' disabled':'')+'>'+(S.authBusy?'Aguarde…':txt)+'</button>';}
+function authView(){
+  var c;
+  if(S.auth==='loading')c='<p>Carregando…</p>';
+  else if(S.auth==='config')c='<h2>Configuração pendente</h2><p>Preencha o firebaseConfig no início do script do index.html com a apiKey e o appId do seu projeto Firebase.</p>';
+  else if(S.auth==='login')c='<h2>Entre na sua conta</h2><p>Use o e-mail e a senha cadastrados para você.</p>'+
+    '<form class="auth-form" data-form="login" novalidate>'+
+    '<label class="f">E-mail<input id="lg-email" type="email" autocomplete="username" inputmode="email"></label>'+
+    '<label class="f">Senha<input id="lg-senha" type="password" autocomplete="current-password"></label>'+
+    erroHtml()+btnSubmit('Entrar')+'</form>'+
+    '<button class="linkbtn" data-act="esqueci">Esqueci minha senha</button>';
+  else if(S.auth==='mfa')c='<h2>Código do Authenticator</h2><p>Abra o Google Authenticator e digite o código de 6 dígitos de MF Treinos.</p>'+
+    '<form class="auth-form" data-form="mfa" novalidate>'+
+    '<label class="f">Código<input id="mfa-code" class="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000"></label>'+
+    erroHtml()+btnSubmit('Confirmar código')+'</form>'+
+    '<button class="linkbtn" data-act="sair">Usar outra conta</button>';
+  else if(S.auth==='verify'){
+    var em=auth&&auth.currentUser?auth.currentUser.email:'';
+    c='<h2>Confirme seu e-mail</h2><p>Enviamos um link de confirmação para <b>'+esc(em)+'</b>. Abra o link e depois volte aqui.</p>'+erroHtml()+
+    '<div class="acts"><button class="btn gold" data-act="jaVerifiquei"'+(S.authBusy?' disabled':'')+'>Já confirmei</button><button class="btn ghost" data-act="reenviar">Reenviar e-mail</button></div>'+
+    '<button class="linkbtn" data-act="sair">Sair</button>';
+  }
+  else if(S.auth==='enroll'){
+    c='<h2>Ative o Google Authenticator</h2><p>No Google Authenticator, toque em + e escaneie o código. Depois digite o código de 6 dígitos que aparecer.</p>';
+    if(S.qrUrl){
+      c+='<a class="btn ghost so-celular" href="'+esc(S.qrUrl)+'">Adicionar no Authenticator deste celular</a>'+
+        (window.QRCode?'<div class="qr-box"><div id="qr" aria-label="QR code para o Google Authenticator"></div></div>':'')+
+        '<p class="chave">Não consegue escanear? Digite esta chave no app: <code>'+esc(S.totpSecret.secretKey)+'</code></p>'+
+        '<form class="auth-form" data-form="enroll" novalidate>'+
+        '<label class="f">Código<input id="en-code" class="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000"></label>'+
+        erroHtml()+btnSubmit('Ativar Authenticator')+'</form>';
+    } else c+=(S.authErr?erroHtml():'<p>Gerando código…</p>');
+    c+='<button class="linkbtn" data-act="sair">Sair</button>';
+  }
+  return '<section class="entry"><div class="entry-card auth-card"><div class="entry-copy">'+c+'</div>'+HERO+'</div></section>';
+}
+
+function iniciarDados(){
+  if(unsubs.length)return;
+  DB={ref:function(k){return {set:function(d){return set(ref(rtdb,k),d);},remove:function(){return remove(ref(rtdb,k));}};}};
+  S.loaded={};S.ready=false;S.dbErro=false;
+  function lista(v){return Object.keys(v||{}).map(function(k){var o=Object.assign({},v[k]);o.id=k;return o;});}
+  function fail(){S.dbErro=true;render();}
+  unsubs.push(onValue(ref(rtdb,'alunos'),function(s){S.alunos=lista(s.val());markLoaded('alunos');render();},fail));
+  unsubs.push(onValue(ref(rtdb,'treinos'),function(s){
+    S.treinos=lista(s.val()).map(function(t){t.dias=(t.dias||[]).map(Number);t.exercicios=t.exercicios||[];return t;});
+    markLoaded('treinos');render();},fail));
+  unsubs.push(onValue(ref(rtdb,'progresso'),function(s){
+    var m={};lista(s.val()).forEach(function(o){m[o.id]={feitos:o.feitos||[],sessoes:o.sessoes||0};});
+    S.progresso=m;markLoaded('progresso');render();},fail));
+}
+function pararDados(){
+  unsubs.forEach(function(u){try{u();}catch(e){}});unsubs=[];DB=null;
+  S.alunos=[];S.treinos=[];S.progresso={};S.ready=false;S.loaded={};S.dbErro=false;S.editor=null;
+}
+function markLoaded(k){S.loaded[k]=true;if(S.loaded.alunos&&S.loaded.treinos&&S.loaded.progresso)S.ready=true;}
+
+function avaliarUsuario(user){
+  if(!user){pararDados();if(S.auth!=='mfa'){S.auth='login';}render();return;}
+  if(multiFactor(user).enrolledFactors.length){S.auth='ok';S.authErr='';iniciarDados();render();return;}
+  pararDados();
+  if(!user.emailVerified){
+    S.auth='verify';
+    if(!S.verifEnviado){S.verifEnviado=true;sendEmailVerification(user).catch(function(e){S.authErr=msgErro(e);render();});}
+    render();return;
+  }
+  prepararCadastro(user);
+}
+async function prepararCadastro(user){
+  S.auth='enroll';S.qrUrl=null;S.totpSecret=null;S.authErr='';render();
+  try{
+    var session=await multiFactor(user).getSession();
+    var sec=await TotpMultiFactorGenerator.generateSecret(session);
+    S.totpSecret=sec;S.qrUrl=sec.generateQrCodeUrl(user.email,'MF Treinos');S.focus='#en-code';
+  }catch(e){
+    if(e&&e.code==='auth/requires-recent-login'){await signOut(auth);S.auth='login';}
+    S.authErr=msgErro(e);
+  }
+  render();
+}
+async function fazerLogin(){
+  var email=($('#lg-email').value||'').trim(),senha=$('#lg-senha').value||'';
+  if(!email||!senha){S.authErr='Preencha e-mail e senha.';render();return;}
+  S.authBusy=true;S.authErr='';render();
+  try{await signInWithEmailAndPassword(auth,email,senha);}
+  catch(e){
+    if(e&&e.code==='auth/multi-factor-auth-required'){S.resolver=getMultiFactorResolver(auth,e);S.auth='mfa';S.focus='#mfa-code';}
+    else S.authErr=msgErro(e);
+  }
+  S.authBusy=false;render();
+}
+function lerCodigo(id){return (($(id)||{}).value||'').replace(/\D/g,'');}
+async function confirmarMfa(){
+  var code=lerCodigo('#mfa-code');
+  if(code.length!==6){S.authErr='Digite os 6 dígitos do código.';render();return;}
+  var hint=S.resolver&&S.resolver.hints.find(function(h){return h.factorId===TotpMultiFactorGenerator.FACTOR_ID;});
+  if(!hint){S.authErr='Esta conta não tem o Authenticator configurado.';render();return;}
+  S.authBusy=true;S.authErr='';render();
+  try{
+    await S.resolver.resolveSignIn(TotpMultiFactorGenerator.assertionForSignIn(hint.uid,code));
+    S.resolver=null;
+  }catch(e){S.authErr=msgErro(e);}
+  S.authBusy=false;render();
+}
+async function confirmarCadastro(){
+  var code=lerCodigo('#en-code');
+  if(code.length!==6){S.authErr='Digite os 6 dígitos do código.';render();return;}
+  S.authBusy=true;S.authErr='';render();
+  try{
+    await multiFactor(auth.currentUser).enroll(TotpMultiFactorGenerator.assertionForEnrollment(S.totpSecret,code),'Google Authenticator');
+    S.totpSecret=null;S.qrUrl=null;S.authBusy=false;
+    await signOut(auth);
+    S.auth='login';toast('Authenticator ativado. Entre de novo usando o código.');
+  }catch(e){S.authErr=msgErro(e);S.authBusy=false;}
+  render();
+}
+async function jaVerifiquei(){
+  var u=auth.currentUser;if(!u)return;
+  S.authBusy=true;render();
+  try{await u.reload();}catch(e){}
+  S.authBusy=false;
+  if(!auth.currentUser.emailVerified){S.authErr='Ainda não identificamos a confirmação. Abra o link do e-mail e tente de novo.';render();return;}
+  S.authErr='';avaliarUsuario(auth.currentUser);
+}
+async function reenviar(){
+  try{await sendEmailVerification(auth.currentUser);toast('E-mail de confirmação reenviado.');}
+  catch(e){S.authErr=msgErro(e);render();}
+}
+async function esqueci(){
+  var el=$('#lg-email'),email=el?(el.value||'').trim():'';
+  if(!email){S.authErr='Digite seu e-mail no campo acima para receber o link.';render();return;}
+  try{await sendPasswordResetEmail(auth,email);S.authErr='';toast('Se o e-mail estiver cadastrado, enviamos um link para redefinir a senha.');}
+  catch(e){S.authErr=msgErro(e);}
+  render();
+}
+async function sair(){
+  S.resolver=null;S.totpSecret=null;S.qrUrl=null;S.authErr='';S.verifEnviado=false;
+  pararDados();S.auth=CONFIG_OK?'login':'config';
+  try{if(auth)await signOut(auth);}catch(e){}
+  render();
+}
+document.addEventListener('submit',function(ev){
+  var f=ev.target.dataset&&ev.target.dataset.form;if(!f)return;
+  ev.preventDefault();if(S.authBusy)return;
+  if(f==='login')fazerLogin();else if(f==='mfa')confirmarMfa();else if(f==='enroll')confirmarCadastro();
+});
+
 /* ---------- boot ---------- */
 loadSession();
-render();
-function snapList(snap){return snap.docs.map(function(d){var o=Object.assign({},d.data());o.id=d.id;return o;});}
-function markLoaded(k){S.loaded[k]=true;if(S.loaded.alunos&&S.loaded.treinos&&S.loaded.progresso)S.ready=true;}
-(function(){
-  var db=null;
-  try{if(window.firebase){firebase.initializeApp({databaseURL:FIREBASE_URL});db=firebase.database();}}catch(e){db=null;}
-  if(!db){loadLocal();S.ready=true;render();toast('Sem conexão com o banco. Usando dados deste aparelho.');return;}
-  DB=db;
-  function lista(v){return Object.keys(v||{}).map(function(k){var o=Object.assign({},v[k]);o.id=k;return o;});}
-  var falhou=false;
-  function fail(){
-    if(falhou)return;falhou=true;
-    if(!S.ready){DB=null;loadLocal();S.ready=true;render();toast('Não foi possível acessar o Firebase. Confira as regras do banco.');}
-    else toast('Conexão com o banco de dados interrompida.');
-  }
-  db.ref('alunos').on('value',function(s){S.alunos=lista(s.val());markLoaded('alunos');render();},fail);
-  db.ref('treinos').on('value',function(s){
-    S.treinos=lista(s.val()).map(function(t){t.dias=(t.dias||[]).map(Number);t.exercicios=t.exercicios||[];return t;});
-    markLoaded('treinos');render();
-  },fail);
-  db.ref('progresso').on('value',function(s){
-    var m={};lista(s.val()).forEach(function(o){m[o.id]={feitos:o.feitos||[],sessoes:o.sessoes||0};});
-    S.progresso=m;markLoaded('progresso');render();
-  },fail);
-})();
+if(!CONFIG_OK){S.auth='config';render();}
+else{
+  app=initializeApp(firebaseConfig);auth=getAuth(app);rtdb=getDatabase(app);
+  render();
+  onAuthStateChanged(auth,avaliarUsuario);
+}
 })();
 </script>
 
