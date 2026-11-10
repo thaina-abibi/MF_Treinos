@@ -182,7 +182,6 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:.85rem;font-weight:
 .auth-card input:hover{border-color:rgba(246,242,232,.35)}
 .auth-card input:focus{border-color:#F2B72E;background:rgba(255,255,255,.1)}
 .auth-card input::placeholder{color:#8F99B3}
-.auth-card input.code{font-size:1.6rem;font-weight:700;letter-spacing:.35em;text-align:center;font-variant-numeric:tabular-nums}
 .auth-card .linkbtn{color:#F2B72E;padding-left:0}
 .auth-card .btn.ghost{color:#F6F2E8;box-shadow:inset 0 0 0 1.5px rgba(246,242,232,.3)}
 .auth-erro{background:rgba(255,138,128,.14);color:#FFB4AB;border-radius:12px;padding:.6rem .8rem;font-size:.92rem}
@@ -201,6 +200,104 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:.85rem;font-weight:
   *{transition:none!important}
   .hero-bar .pl{animation:none}
 }
+
+/* ===== acabamento moderno ===== */
+:root{--shadow-sm:0 1px 2px rgba(20,33,61,.06),0 2px 8px -4px rgba(20,33,61,.12);--shadow:0 1px 2px rgba(20,33,61,.05),0 12px 32px -16px rgba(20,33,61,.28);--navy:#14213D;--gold:#F2B72E;--cream:#F6F2E8}
+body{background:radial-gradient(1200px 500px at 85% -10%,rgba(242,183,46,.14),transparent 60%),var(--bg);background-attachment:fixed;min-height:100vh}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;margin:0 -16px 12px;padding:12px 16px;background:color-mix(in srgb,var(--chalk) 86%,transparent);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4)}
+.logo{width:42px;height:42px;border-radius:13px;background:linear-gradient(145deg,#1F3263,var(--navy));color:var(--gold);box-shadow:var(--shadow-sm)}
+:root[data-theme="dark"] .logo{background:linear-gradient(145deg,#2A3E73,#1A2A55)}
+.seg{background:var(--surface);box-shadow:var(--shadow-sm)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--chalk);box-shadow:none}
+.btn{transition:transform .12s ease,background-color .15s,box-shadow .2s,filter .15s}
+.btn.gold{background:linear-gradient(180deg,#F7C64A,#EDAA16);box-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 6px 16px -8px rgba(237,170,22,.8)}
+.btn.gold:hover{filter:brightness(1.04);box-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 10px 22px -10px rgba(237,170,22,.9)}
+
+/* superfícies */
+.side,.panel{box-shadow:var(--shadow);border:1px solid color-mix(in srgb,var(--line) 55%,transparent)}
+.panel{--pad:clamp(18px,3.5vw,32px);padding:var(--pad)}
+.tcard,.edrow{background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-sm);transition:transform .2s ease,box-shadow .2s ease}
+.tcard{position:relative;overflow:hidden;padding-top:22px}
+.tcard::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,var(--gold),#D9960A)}
+.tcard:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.stat{background:var(--surface);box-shadow:var(--shadow-sm)}
+
+/* hero em azul-marinho com brilho dourado */
+.entry-card,.phero{position:relative;overflow:hidden;isolation:isolate;
+  background:radial-gradient(90% 120% at 100% 0%,rgba(242,183,46,.26),transparent 55%),radial-gradient(70% 110% at 0% 100%,rgba(70,96,160,.45),transparent 60%),#14213D}
+.entry-card::before,.phero::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(rgba(246,242,232,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(246,242,232,.05) 1px,transparent 1px);background-size:32px 32px;
+  -webkit-mask-image:radial-gradient(80% 90% at 70% 30%,#000,transparent);mask-image:radial-gradient(80% 90% at 70% 30%,#000,transparent)}
+.entry-card{box-shadow:0 30px 60px -30px rgba(20,33,61,.6)}
+.phero{--ink:#F6F2E8;--muted:#C2CADB;--surface:rgba(255,255,255,.08);--bg:rgba(255,255,255,.06);--line:rgba(246,242,232,.14);--chalk:#14213D;
+  color:#F6F2E8;margin:calc(var(--pad)*-1 + 6px) calc(var(--pad)*-1 + 6px) 0;border-radius:24px;padding:calc(var(--pad) - 4px);display:flex;flex-direction:column;gap:20px}
+.phero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.who{display:flex;gap:14px;align-items:center;min-width:0}
+.who h2{color:#FFFFFF}
+.kicker{font-size:.9rem;font-weight:700;color:var(--gold)}
+.goal{display:inline-block;margin-top:8px;font-size:.85rem;font-weight:700;color:#F6F2E8;background:rgba(255,255,255,.1);border:1px solid rgba(246,242,232,.18);border-radius:999px;padding:.15rem .7rem}
+.phero .stat{background:rgba(255,255,255,.07);box-shadow:none;border:1px solid rgba(246,242,232,.12);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.phero .stat b{color:var(--gold)}
+.phero .btn.ghost{color:#F6F2E8;box-shadow:inset 0 0 0 1.5px rgba(246,242,232,.3)}
+.phero .btn.ghost:hover{box-shadow:inset 0 0 0 1.5px #F6F2E8}
+.phero .wd{background:rgba(255,255,255,.06);color:rgba(246,242,232,.45)}
+.phero .wd.has{color:#F6F2E8;background:rgba(255,255,255,.1)}
+.phero .wd.today{box-shadow:inset 0 0 0 2px var(--gold)}
+.phero .wd.sel{background:var(--gold);color:var(--navy)}
+.phero .wd.sel i{background:var(--navy)}
+
+/* avatares */
+.avatar{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.85rem;letter-spacing:.02em;
+  background:linear-gradient(145deg,#2A3E73,var(--navy));color:var(--gold)}
+.avatar.lg{width:58px;height:58px;font-size:1.15rem;background:linear-gradient(145deg,#F7C64A,#D9960A);color:var(--navy);box-shadow:0 0 0 4px rgba(242,183,46,.2)}
+.aitem{flex-direction:row;align-items:center;gap:12px}
+.ainfo{display:flex;flex-direction:column;gap:1px;min-width:0}
+.ainfo b,.ainfo small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.aitem[aria-current="true"] .avatar{background:linear-gradient(145deg,#F7C64A,#D9960A);color:var(--navy)}
+
+/* progresso e exercícios */
+.pcard{background:var(--bg);border-radius:20px;padding:16px 18px 6px;display:flex;flex-direction:column;gap:4px}
+.pnum{font-weight:600;color:var(--muted)}
+.pnum b{font-stretch:72%;font-size:2rem;font-weight:800;color:var(--ink);line-height:1}
+.pnum span{font-weight:800;color:var(--ink)}
+.exb{background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-sm);transition:transform .15s ease,background-color .2s,border-color .2s}
+.exb:hover{transform:translateY(-1px);background:var(--surface)}
+.exb:active{transform:scale(.99)}
+.chk{box-shadow:inset 0 0 0 2px var(--line);color:var(--muted);font-size:.95rem}
+.chk .v{display:none}
+.exb[aria-pressed="true"]{background:var(--primary-soft);border-color:transparent}
+.exb[aria-pressed="true"] .chk{animation:pop .3s ease}
+.exb[aria-pressed="true"] .chk .n{display:none}
+.exb[aria-pressed="true"] .chk .v{display:inline}
+@keyframes pop{50%{transform:scale(1.18)}}
+.exb .meta span{background:var(--bg)}
+.exb[aria-pressed="true"] .meta span{background:var(--surface)}
+.done{background:radial-gradient(90% 140% at 100% 0%,rgba(242,183,46,.3),transparent 60%),#14213D;color:#F6F2E8;box-shadow:var(--shadow)}
+
+/* entrada suave ao trocar de tela */
+#app.enter > section,#app.enter > .pv{animation:rise .45s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+@media (max-width:760px){
+  .phero{border-radius:20px}
+  .who h2{font-size:1.7rem}
+  .avatar.lg{width:48px;height:48px;font-size:1rem}
+  .phero-top .btn.gold{width:100%}
+}
+@media (prefers-reduced-motion:reduce){#app.enter > *{animation:none!important}.exb[aria-pressed="true"] .chk{animation:none}}
+
+/* importar fichas */
+.imp-list{display:flex;flex-direction:column;gap:12px}
+.imp{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow-sm);transition:opacity .2s}
+.imp.off{opacity:.55}
+.imp h3{font-size:1.4rem}
+.imp-ex{font-size:.9rem;margin-top:4px}
+.imp-tag{display:inline-block;margin-top:8px;font-size:.8rem;font-weight:700;color:#8A5A00;background:#FBEFC9;border-radius:999px;padding:.1rem .6rem}
+.imp .btn[aria-pressed="true"]{background:var(--ink);color:var(--chalk);box-shadow:none}
+.imp-check{display:flex;align-items:center;gap:10px;background:none;border:0;padding:6px 0;text-align:left;font-weight:600;min-height:44px}
+.imp-check .box{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;box-shadow:inset 0 0 0 2px var(--line);color:transparent;font-size:.8rem;flex:none}
+.imp-check[aria-pressed="true"] .box{background:var(--gold);box-shadow:none;color:var(--navy)}
 </style>
 
 
@@ -208,11 +305,10 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:.85rem;font-weight:
   <div id="app"></div>
 </div>
 <div id="toast" class="toast" role="status" hidden></div>
-<div id="recaptcha"></div>
 
 <script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut,sendEmailVerification,sendPasswordResetEmail,multiFactor,getMultiFactorResolver,RecaptchaVerifier,PhoneAuthProvider,PhoneMultiFactorGenerator} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut,sendPasswordResetEmail} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {getDatabase,ref,set,remove,onValue} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
 /* ====== CONFIGURAÇÃO DO FIREBASE ======
@@ -232,6 +328,26 @@ const firebaseConfig={
 (function(){
 var DIAS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 var ORDEM=[1,2,3,4,5,6,0];
+/* Fichas prontas para importar (A, B, C e D) */
+function FX(nome,series,reps,obs){return {nome:nome,series:String(series),reps:reps,obs:obs||''};}
+var FICHAS=[
+  {nome:'Treino A',dias:[1],exercicios:[
+    FX('Gêmeos sentado',4,'15'),FX('Cadeira abdutora',4,'15'),FX('Agachamento livre',4,'12'),
+    FX('Búlgaro no Smith',3,'12','Com step à frente'),FX('Coice na polia / recuo',3,'15','Com step à frente'),
+    FX('Abdução na polia',3,'10'),FX('Mesa flexora',4,'12')]},
+  {nome:'Treino B',dias:[2],exercicios:[
+    FX('Remada baixa',4,'12'),FX('Remada curvada',4,'12-15','Barra, pegada supinada'),FX('Crucifixo na máquina',4,'12'),
+    FX('Supino inclinado',4,'8-10-12-15','Com halter, carga progressiva'),FX('Tríceps francês',4,'15'),FX('Rosca direta',4,'15'),
+    FX('Abdominal remador',4,'20'),FX('Prancha tocando o ombro',4,'30')]},
+  {nome:'Treino C',dias:[3],exercicios:[
+    FX('Agachamento hack',4,'12-15'),FX('Leg press',4,'12'),FX('Cadeira extensora',3,'15'),FX('Cadeira abdutora',4,'15'),
+    FX('Búlgaro',3,'10'),FX('Elevação pélvica',3,'15'),FX('Panturrilha em pé',5,'20')]},
+  {nome:'Treino D',dias:[4],exercicios:[
+    FX('Desenvolvimento',3,'10','Drop set'),FX('Elevação frontal',4,'12'),FX('Elevação lateral',4,'8'),FX('Pull down',4,'12'),
+    FX('Puxada aberta',4,'12'),FX('Supino reto na máquina',4,'10'),FX('Burpee',4,'15'),FX('Prancha isométrica',4,'1 min')]}
+];
+/* "12" -> "12 reps"; "8-10-12-15" -> "8 · 10 · 12 · 15 reps"; "1 min" fica como está */
+function fmtReps(r){r=String(r||'').trim();if(!r)return '';if(/[a-zà-ú]/i.test(r))return r;return r.split(/\s*-\s*/).join(' · ')+' reps';}
 var SUGESTOES=['Agachamento livre','Leg press 45°','Cadeira extensora','Mesa flexora','Stiff','Afundo','Elevação pélvica','Panturrilha em pé','Supino reto','Supino inclinado','Crucifixo','Flexão de braço','Puxada frontal','Remada baixa','Remada curvada','Barra fixa','Desenvolvimento com halteres','Elevação lateral','Rosca direta','Rosca martelo','Tríceps corda','Tríceps testa','Abdominal infra','Prancha','Esteira','Bicicleta ergométrica'];
 
 var SEED={
@@ -263,6 +379,7 @@ var DB=null, queues={};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 function $(sel){return document.querySelector(sel);}
+function iniciais(n){var p=String(n||'').trim().split(/\s+/);var r=((p[0]||'')[0]||'')+(p.length>1?(p[p.length-1][0]||''):'');return esc(r.toUpperCase());}
 
 /* ---------- storage ---------- */
 function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
@@ -378,7 +495,7 @@ function personal(){
   if(S.alunos.length){
     side+='<ul class="alist">'+S.alunos.slice().sort(function(a,b){return a.nome.localeCompare(b.nome);}).map(function(a){
       var n=treinosDe(a.id).length;
-      return '<li><button class="aitem" data-act="selAluno" data-id="'+esc(a.id)+'" aria-current="'+(S.sel===a.id)+'"><b>'+esc(a.nome)+(a.exemplo?'<span class="ex-tag">exemplo</span>':'')+'</b><small>'+n+(n===1?' treino':' treinos')+(a.objetivo?' · '+esc(a.objetivo):'')+'</small></button></li>';
+      return '<li><button class="aitem" data-act="selAluno" data-id="'+esc(a.id)+'" aria-current="'+(S.sel===a.id)+'"><span class="avatar">'+iniciais(a.nome)+'</span><span class="ainfo"><b>'+esc(a.nome)+(a.exemplo?'<span class="ex-tag">exemplo</span>':'')+'</b><small>'+n+(n===1?' treino':' treinos')+(a.objetivo?' · '+esc(a.objetivo):'')+'</small></span></button></li>';
     }).join('')+'</ul>';
   }
   side+='<label class="f">Novo aluno<input id="novo-nome" placeholder="Nome do aluno" autocomplete="off"></label>'+
@@ -390,16 +507,18 @@ function personal(){
   if(!S.sel&&S.alunos.length)S.sel=S.alunos[0].id;
   if(!S.alunos.length){
     main='<section class="panel"><div class="empty"><h2>Nenhum aluno ainda</h2><p class="muted">Cadastre o primeiro aluno ao lado para começar a montar treinos.</p></div></section>';
+  } else if(S.importar){
+    main=importView();
   } else if(S.editor){
     main=editor();
   } else {
     var a=alunoPorId(S.sel);
     var ts=treinosDe(a.id);
-    main='<section class="panel"><div class="rowb"><div><div class="eyebrow">Aluno</div><h2>'+esc(a.nome)+'</h2>'+(a.objetivo?'<p class="muted">'+esc(a.objetivo)+'</p>':'')+'</div>'+
-      '<button class="btn gold" data-act="novoTreino">+ Novo treino</button></div>'+
-      '<div class="stats"><div class="stat"><b>'+ts.length+'</b><span>treinos</span></div><div class="stat"><b>'+sessoes(a.id)+'</b><span>sessões concluídas</span></div></div>';
+    main='<section class="panel"><div class="phero"><div class="phero-top"><div class="who"><span class="avatar lg">'+iniciais(a.nome)+'</span><div><div class="kicker">Aluno</div><h2>'+esc(a.nome)+'</h2>'+(a.objetivo?'<span class="goal">'+esc(a.objetivo)+'</span>':'')+'</div></div>'+
+      '<div class="acts"><button class="btn ghost" data-act="abrirImport">Importar fichas</button><button class="btn gold" data-act="novoTreino">+ Novo treino</button></div></div>'+
+      '<div class="stats"><div class="stat"><b>'+ts.length+'</b><span>'+(ts.length===1?'treino':'treinos')+'</span></div><div class="stat"><b>'+sessoes(a.id)+'</b><span>sessões concluídas</span></div></div></div>';
     if(!ts.length){
-      main+='<div class="empty"><h3>Sem treinos para '+esc(a.nome.split(' ')[0])+'</h3><p class="muted">Crie o primeiro treino e escolha os dias da semana.</p><button class="btn" data-act="novoTreino">Criar treino</button></div>';
+      main+='<div class="empty"><h3>Sem treinos para '+esc(a.nome.split(' ')[0])+'</h3><p class="muted">Crie o primeiro treino e escolha os dias da semana.</p><div class="acts" style="justify-content:center"><button class="btn" data-act="novoTreino">Criar treino</button><button class="btn ghost" data-act="abrirImport">Importar fichas A–D</button></div></div>';
     } else {
       main+='<div class="tcards">'+ts.map(function(t){return tcard(t);}).join('')+'</div>';
     }
@@ -419,6 +538,44 @@ function tcard(t){
     '<div class="acts">'+(S.confirm==='t:'+t.id?
       '<span class="muted">Excluir este treino?</span><button class="btn danger sm" data-act="delTreinoYes" data-id="'+esc(t.id)+'">Sim, excluir</button><button class="btn ghost sm" data-act="cancelConfirm">Cancelar</button>':
       '<button class="btn ghost sm" data-act="editTreino" data-id="'+esc(t.id)+'">Editar</button><button class="btn ghost sm" data-act="delTreinoAsk" data-id="'+esc(t.id)+'">Excluir</button>')+'</div></article>';
+}
+function abrirImport(){
+  S.editor=null;S.confirm=null;
+  S.importar={pular:true,fichas:FICHAS.map(function(f){return {nome:f.nome,dias:f.dias.slice(),incluir:true,exercicios:f.exercicios};})};
+}
+function nomesExistentes(alunoId){return treinosDe(alunoId).map(function(t){return (t.nome||'').trim().toLowerCase();});}
+function importView(){
+  var im=S.importar,a=alunoPorId(S.sel),ja=nomesExistentes(S.sel);
+  var sel=im.fichas.filter(function(f){return f.incluir&&!(im.pular&&ja.indexOf(f.nome.toLowerCase())>-1);}).length;
+  var h='<section class="panel"><div><div class="eyebrow">Importar fichas · '+esc(a?a.nome:'')+'</div><h2>Treinos A, B, C e D</h2>'+
+    '<p class="muted" style="margin-top:6px">Confira os dias de cada treino e importe para este aluno. Depois você pode editar cargas e detalhes normalmente.</p></div>'+
+    '<div class="imp-list">'+im.fichas.map(function(f,i){
+      var existe=ja.indexOf(f.nome.toLowerCase())>-1;
+      return '<article class="imp'+(f.incluir?'':' off')+'"><div class="rowb"><div><h3>'+esc(f.nome)+'</h3>'+
+        '<p class="muted imp-ex">'+f.exercicios.length+' exercícios · '+esc(f.exercicios.map(function(e){return e.nome;}).join(', '))+'</p>'+
+        (existe?'<span class="imp-tag">'+(im.pular?'Já existe · será pulado':'Já existe · será importado de novo')+'</span>':'')+'</div>'+
+        '<button class="btn ghost sm" data-act="impIncluir" data-f="'+i+'" aria-pressed="'+f.incluir+'">'+(f.incluir?'Incluído':'Não incluir')+'</button></div>'+
+        '<div class="dchips">'+ORDEM.map(function(d){return '<button class="dchip" data-act="impDia" data-f="'+i+'" data-d="'+d+'" aria-pressed="'+(f.dias.indexOf(d)>-1)+'"'+(f.incluir?'':' disabled')+'>'+DIAS[d]+'</button>';}).join('')+'</div></article>';
+    }).join('')+'</div>'+
+    '<div class="edgrid"><label class="f">Descanso padrão entre séries (s)<input id="imp-desc" inputmode="numeric" value="60"></label></div>'+
+    '<button class="imp-check" data-act="impPular" aria-pressed="'+im.pular+'"><span class="box" aria-hidden="true">✓</span>Pular treinos que o aluno já tem com o mesmo nome</button>'+
+    '<div class="acts"><button class="btn gold" data-act="fazerImport"'+(sel?'':' disabled')+'>Importar '+sel+(sel===1?' treino':' treinos')+'</button><button class="btn ghost" data-act="cancelImport">Cancelar</button></div></section>';
+  return h;
+}
+function fazerImport(){
+  var im=S.importar,alunoId=S.sel,ja=nomesExistentes(alunoId);
+  var desc=String(Math.max(0,parseInt((($('#imp-desc')||{}).value),10)||0));
+  var base=Date.now(),n=0,pulados=[];
+  im.fichas.forEach(function(f,i){
+    if(!f.incluir)return;
+    if(im.pular&&ja.indexOf(f.nome.toLowerCase())>-1){pulados.push(f.nome);return;}
+    var t={id:uid(),alunoId:alunoId,nome:f.nome,dias:f.dias.slice().sort(),criadoEm:base+i,
+      exercicios:f.exercicios.map(function(e,j){return {id:'e'+(j+1),nome:e.nome,series:e.series,reps:e.reps,carga:'',descanso:desc,obs:e.obs};})};
+    S.treinos.push(t);persist('treinos',t.id,strip(t));n++;
+  });
+  S.importar=null;
+  toast(n+(n===1?' treino importado':' treinos importados')+(pulados.length?'. Já existiam: '+pulados.join(', '):'')+'.');
+  render();
 }
 function editor(){
   var ed=S.editor,a=alunoPorId(ed.alunoId);
@@ -453,7 +610,7 @@ function escolherAluno(){
     h+='<div class="empty"><h3>Nenhum aluno cadastrado</h3><p class="muted">Peça ao seu personal para cadastrar você e volte aqui.</p></div>';
   } else {
     h+='<ul class="alist">'+S.alunos.slice().sort(function(a,b){return a.nome.localeCompare(b.nome);}).map(function(a){
-      return '<li><button class="aitem" data-act="escolheAluno" data-id="'+esc(a.id)+'"><b>'+esc(a.nome)+(a.exemplo?'<span class="ex-tag">exemplo</span>':'')+'</b><small>'+treinosDe(a.id).length+' treinos</small></button></li>';
+      return '<li><button class="aitem" data-act="escolheAluno" data-id="'+esc(a.id)+'"><span class="avatar">'+iniciais(a.nome)+'</span><span class="ainfo"><b>'+esc(a.nome)+(a.exemplo?'<span class="ex-tag">exemplo</span>':'')+'</b><small>'+treinosDe(a.id).length+' treinos</small></span></button></li>';
     }).join('')+'</ul>';
   }
   return h+'</section>';
@@ -466,29 +623,29 @@ function aluno(){
   if(!cur){cur=ts.find(function(t){return t.dias.indexOf(hoje)>-1;})||ts[0]||null;}
   S.selTreino=cur?cur.id:null;
   var treinoHoje=ts.find(function(t){return t.dias.indexOf(hoje)>-1;});
-  var h='<section class="panel"><div class="rowb"><div><div class="eyebrow">Olá, '+esc(a.nome.split(' ')[0])+'</div>'+
-    '<h2>'+(treinoHoje?'Hoje é dia de treino.':ts.length?'Seus treinos da semana.':'Seu treino vem aí.')+'</h2></div>'+
+  var h='<section class="panel"><div class="phero"><div class="phero-top"><div class="who"><span class="avatar lg">'+iniciais(a.nome)+'</span><div><div class="kicker">Olá, '+esc(a.nome.split(' ')[0])+'</div>'+
+    '<h2>'+(treinoHoje?'Hoje é dia de treino.':ts.length?'Seus treinos da semana.':'Seu treino vem aí.')+'</h2></div></div>'+
     '<button class="btn ghost sm" data-act="trocarAluno">Trocar aluno</button></div>';
   if(!ts.length){
-    return h+'<div class="empty"><h3>Ainda sem treino</h3><p class="muted">Seu personal ainda não montou um treino para você. Assim que ele salvar, aparece aqui.</p></div></section>';
+    return h+'</div><div class="empty"><h3>Ainda sem treino</h3><p class="muted">Seu personal ainda não montou um treino para você. Assim que ele salvar, aparece aqui.</p></div></section>';
   }
   h+='<div class="week" aria-label="Semana">'+ORDEM.map(function(d){
     var t=ts.find(function(x){return x.dias.indexOf(d)>-1;});
     var sel=cur&&cur.dias.indexOf(d)>-1;
     return '<button class="wd'+(t?' has':'')+(d===hoje?' today':'')+(sel?' sel':'')+'" data-act="selDia" data-d="'+d+'"'+(t?'':' disabled')+' aria-label="'+DIAS[d]+(d===hoje?' (hoje)':'')+'">'+DIAS[d]+'<i></i></button>';
-  }).join('')+'</div>';
+  }).join('')+'</div></div>';
   if(ts.length>1){
     h+='<div class="tchips">'+ts.map(function(t){return '<button class="tchip" data-act="selTreino" data-id="'+esc(t.id)+'" aria-pressed="'+(cur&&cur.id===t.id)+'">'+esc(t.nome)+'</button>';}).join('')+'</div>';
   }
   var f=feitos(cur),tot=cur.exercicios.length,p=S.progresso[cur.id],ses=(p&&p.sessoes)||0;
   var dias=ORDEM.filter(function(d){return cur.dias.indexOf(d)>-1;}).map(function(d){return DIAS[d];}).join(' · ');
   h+='<div class="rowb"><div><div class="eyebrow">'+(dias||'Treino')+'</div><h3 style="font-size:1.5rem">'+esc(cur.nome)+'</h3></div>'+(cur.dias.indexOf(hoje)>-1?'<span class="sticker">Hoje</span>':'')+'</div>'+
-    '<div><div class="rowb" style="margin-bottom:6px"><span style="font-weight:700">'+f+' de '+tot+' exercícios</span><span class="muted">'+ses+(ses===1?' sessão concluída':' sessões concluídas')+'</span></div>'+
+    '<div class="pcard"><div class="rowb"><span class="pnum"><b>'+f+'</b><span>/'+tot+'</span> exercícios feitos</span><span class="muted">'+ses+(ses===1?' sessão concluída':' sessões concluídas')+'</span></div>'+
     barra(f,tot)+'</div>'+
     '<ul class="ex">'+cur.exercicios.map(function(e,i){
       var on=p&&p.feitos&&p.feitos.indexOf(e.id)>-1;
-      return '<li><button class="exb" data-act="toggleEx" data-t="'+esc(cur.id)+'" data-e="'+esc(e.id)+'" aria-pressed="'+(!!on)+'"><span class="chk" aria-hidden="true">✓</span><span style="min-width:0"><span class="exn">'+esc(e.nome)+'</span>'+
-        '<span class="meta" style="display:flex"><span>'+esc(e.series)+' séries</span><span>'+esc(e.reps)+' reps</span>'+(e.carga?'<span>'+esc(e.carga)+' kg</span>':'')+(e.descanso?'<span>'+esc(e.descanso)+' s descanso</span>':'')+'</span>'+
+      return '<li><button class="exb" data-act="toggleEx" data-t="'+esc(cur.id)+'" data-e="'+esc(e.id)+'" aria-pressed="'+(!!on)+'"><span class="chk" aria-hidden="true"><span class="n">'+(i+1)+'</span><span class="v">✓</span></span><span style="min-width:0"><span class="exn">'+esc(e.nome)+'</span>'+
+        '<span class="meta" style="display:flex"><span>'+esc(e.series)+' séries</span><span>'+esc(fmtReps(e.reps))+'</span>'+(e.carga?'<span>'+esc(e.carga)+' kg</span>':'')+(e.descanso?'<span>'+esc(e.descanso)+' s descanso</span>':'')+'</span>'+
         (e.obs?'<span class="obs" style="display:block">'+esc(e.obs)+'</span>':'')+'</span></button></li>';
     }).join('')+'</ul>';
   if(tot&&f===tot){
@@ -513,8 +670,10 @@ function render(){
   else if(S.papel==='personal')body=personal();
   else body=aluno();
   app.innerHTML=header()+body;
+  var vk=S.auth+'|'+(S.ready?1:0)+'|'+S.papel+'|'+(S.editor?1:0)+(S.importar?'i':'')+'|'+S.sel+'|'+S.alunoId;
+  if(vk!==render._k){render._k=vk;app.classList.add('enter');clearTimeout(render._t);render._t=setTimeout(function(){app.classList.remove('enter');},500);}
   Array.prototype.forEach.call(app.querySelectorAll('input[id]'),function(el){
-    if(el.id in saved&&(el.id==='novo-nome'||el.id==='novo-obj'||/^(lg|mfa|en)-/.test(el.id))&&el.value!==saved[el.id])el.value=saved[el.id];
+    if(el.id in saved&&(el.id==='novo-nome'||el.id==='novo-obj'||/^(lg|imp)-/.test(el.id))&&el.value!==saved[el.id])el.value=saved[el.id];
   });
   if(S.focus){var f=$(S.focus);if(f)f.focus();S.focus=null;}
   else if(active){var el=document.getElementById(active);if(el){el.focus();if(selS!=null){try{el.setSelectionRange(selS,selE);}catch(e){}}}}
@@ -527,15 +686,15 @@ document.addEventListener('click',function(ev){
   var b=ev.target.closest('[data-act]');if(!b||b.disabled)return;
   var act=b.dataset.act,d=b.dataset;
   switch(act){
-    case 'papel':S.papel=d.v;S.editor=null;S.confirm=null;saveSession();break;
-    case 'selAluno':S.sel=d.id;S.editor=null;S.confirm=null;break;
+    case 'papel':S.papel=d.v;S.editor=null;S.importar=null;S.confirm=null;saveSession();break;
+    case 'selAluno':S.sel=d.id;S.editor=null;S.importar=null;S.confirm=null;break;
     case 'addAluno':addAluno();return;
     case 'delAlunoAsk':S.confirm='a:'+d.id;break;
     case 'delAlunoYes':S.confirm=null;delAluno(d.id);break;
     case 'delTreinoAsk':S.confirm='t:'+d.id;break;
     case 'delTreinoYes':S.confirm=null;delTreino(d.id);break;
     case 'cancelConfirm':S.confirm=null;break;
-    case 'novoTreino':novoEditor(S.sel,null);S.focus='#ed-nome';break;
+    case 'novoTreino':S.importar=null;novoEditor(S.sel,null);S.focus='#ed-nome';break;
     case 'editTreino':novoEditor(S.sel,S.treinos.find(function(t){return t.id===d.id;}));break;
     case 'cancelEditor':S.editor=null;break;
     case 'saveEditor':saveEditor();return;
@@ -552,10 +711,13 @@ document.addEventListener('click',function(ev){
     case 'zerar':zerar(d.t);break;
     case 'sair':sair();return;
     case 'esqueci':esqueci();return;
-    case 'jaVerifiquei':jaVerifiquei();return;
-    case 'reenviar':reenviar();return;
-    case 'reenviarSms':enviarSmsLogin();return;
-    case 'trocarNumero':S.enrollStep='phone';S.verificationId=null;S.authErr='';break;
+    case 'abrirImport':abrirImport();break;
+    case 'cancelImport':S.importar=null;break;
+    case 'impIncluir':var fi=S.importar.fichas[+d.f];fi.incluir=!fi.incluir;break;
+    case 'impDia':var fd=S.importar.fichas[+d.f],k=fd.dias.indexOf(+d.d);if(k>-1)fd.dias.splice(k,1);else fd.dias.push(+d.d);break;
+    case 'impPular':S.importar.pular=!S.importar.pular;break;
+    case 'fazerImport':fazerImport();return;
+
   }
   render();
 });
@@ -570,10 +732,10 @@ document.addEventListener('keydown',function(ev){
   if(ev.key==='Enter'&&(ev.target.id==='novo-nome'||ev.target.id==='novo-obj')){ev.preventDefault();addAluno();}
 });
 
-/* ---------- autenticação ---------- */
-Object.assign(S,{auth:'loading',authErr:'',authBusy:false,resolver:null,verificationId:null,enrollStep:'phone',telefone:'',dicaTel:'',verifEnviado:false,dbErro:false});
+/* ---------- autenticação (e-mail e senha) ---------- */
+Object.assign(S,{auth:'loading',authErr:'',authBusy:false,dbErro:false});
 var CONFIG_OK=firebaseConfig.apiKey&&firebaseConfig.apiKey.indexOf('COLE_')!==0;
-var app=null,auth=null,rtdb=null,unsubs=[],recaptcha=null;
+var app=null,auth=null,rtdb=null,unsubs=[];
 var HERO='<div class="hero-bar" aria-hidden="true"><svg viewBox="0 0 500 200"><rect x="10" y="94" width="480" height="12" rx="6" fill="var(--steel)"/><rect x="140" y="86" width="12" height="28" rx="3" fill="var(--ink)"/><rect x="348" y="86" width="12" height="28" rx="3" fill="var(--ink)"/><rect class="pl l1" style="--from:-30px" x="118" y="25" width="20" height="150" rx="6" fill="var(--p-red)"/><rect class="pl l2" style="--from:-30px" x="94" y="25" width="20" height="150" rx="6" fill="var(--p-blue)"/><rect class="pl l3" style="--from:-30px" x="72" y="40" width="18" height="120" rx="6" fill="var(--p-yellow)"/><rect class="pl l4" style="--from:-30px" x="54" y="54" width="14" height="92" rx="6" fill="var(--p-green)"/><rect class="pl r1" style="--from:30px" x="362" y="25" width="20" height="150" rx="6" fill="var(--p-red)"/><rect class="pl r2" style="--from:30px" x="386" y="25" width="20" height="150" rx="6" fill="var(--p-blue)"/><rect class="pl r3" style="--from:30px" x="410" y="40" width="18" height="120" rx="6" fill="var(--p-yellow)"/><rect class="pl r4" style="--from:30px" x="432" y="54" width="14" height="92" rx="6" fill="var(--p-green)"/></svg></div>';
 
 function msgErro(e){
@@ -585,69 +747,23 @@ function msgErro(e){
     'auth/invalid-email':'E-mail inválido.',
     'auth/user-disabled':'Esta conta foi desativada.',
     'auth/too-many-requests':'Muitas tentativas. Aguarde alguns minutos e tente de novo.',
-    'auth/invalid-verification-code':'Código inválido. Confira o SMS e tente de novo.',
-    'auth/code-expired':'O código expirou. Peça um novo SMS.',
-    'auth/missing-code':'Digite o código de 6 dígitos.',
-    'auth/invalid-phone-number':'Número de celular inválido. Use DDD + número, por exemplo (12) 99999-9999.',
-    'auth/missing-phone-number':'Digite o número do celular.',
-    'auth/second-factor-already-in-use':'Este celular já está cadastrado nesta conta.',
-    'auth/quota-exceeded':'Limite de envio de SMS atingido. Tente mais tarde.',
-    'auth/captcha-check-failed':'A verificação de segurança falhou. Recarregue a página e tente de novo.',
-    'auth/invalid-app-credential':'A verificação de segurança falhou. Recarregue a página e tente de novo.',
-    'auth/billing-not-enabled':'O envio de SMS exige o plano Blaze no Firebase.',
-    'auth/operation-not-allowed':'A verificação por SMS ainda não foi ativada no projeto Firebase.',
-    'auth/admin-restricted-operation':'O envio de SMS para este número não está permitido nas configurações do Firebase.',
-    'auth/unverified-email':'Confirme seu e-mail antes de cadastrar o celular.',
-    'auth/requires-recent-login':'Por segurança, entre novamente.',
+    'auth/multi-factor-auth-required':'Esta conta ainda tem verificação em duas etapas ativa no Firebase. Remova-a no console para entrar só com e-mail e senha.',
+    'auth/operation-not-allowed':'O login por e-mail e senha não está ativado no Firebase.',
     'auth/network-request-failed':'Sem conexão. Verifique a internet.'
   };
   return m[c]||('Não foi possível concluir ('+(c||'erro desconhecido')+').');
 }
-function erroHtml(){return S.authErr?'<p class="auth-erro" role="alert">'+esc(S.authErr)+'</p>':'';}
-function btnSubmit(txt){return '<button type="submit" class="btn gold"'+(S.authBusy?' disabled':'')+'>'+(S.authBusy?'Aguarde…':txt)+'</button>';}
-function campoCodigo(id){return '<label class="f">Código do SMS<input id="'+id+'" class="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000"></label>';}
 function authView(){
   var c;
   if(S.auth==='loading')c='<p>Carregando…</p>';
   else if(S.auth==='config')c='<h2>Configuração pendente</h2><p>Preencha o firebaseConfig no início do script do index.html com a apiKey e o appId do seu projeto Firebase.</p>';
-  else if(S.auth==='login')c='<h2>Entre na sua conta</h2><p>Use o e-mail e a senha cadastrados para você.</p>'+
+  else c='<h2>Entre na sua conta</h2><p>Use o e-mail e a senha cadastrados para você.</p>'+
     '<form class="auth-form" data-form="login" novalidate>'+
     '<label class="f">E-mail<input id="lg-email" type="email" autocomplete="username" inputmode="email"></label>'+
     '<label class="f">Senha<input id="lg-senha" type="password" autocomplete="current-password"></label>'+
-    erroHtml()+btnSubmit('Entrar')+'</form>'+
+    (S.authErr?'<p class="auth-erro" role="alert">'+esc(S.authErr)+'</p>':'')+
+    '<button type="submit" class="btn gold"'+(S.authBusy?' disabled':'')+'>'+(S.authBusy?'Aguarde…':'Entrar')+'</button></form>'+
     '<button class="linkbtn" data-act="esqueci">Esqueci minha senha</button>';
-  else if(S.auth==='mfa'){
-    c='<h2>Confirme pelo SMS</h2>';
-    if(S.verificationId){
-      c+='<p>Enviamos um código para o celular <b>'+esc(S.dicaTel)+'</b>.</p>'+
-        '<form class="auth-form" data-form="mfa" novalidate>'+campoCodigo('mfa-code')+erroHtml()+btnSubmit('Confirmar código')+'</form>'+
-        '<button class="linkbtn" data-act="reenviarSms">Reenviar SMS</button>';
-    } else {
-      c+='<p>'+(S.authBusy?'Enviando o código para '+esc(S.dicaTel)+'…':'Não foi possível enviar o SMS.')+'</p>'+erroHtml()+
-        (S.authBusy?'':'<button class="btn gold" data-act="reenviarSms">Tentar enviar de novo</button>');
-    }
-    c+='<button class="linkbtn" data-act="sair">Usar outra conta</button>';
-  }
-  else if(S.auth==='verify'){
-    var em=auth&&auth.currentUser?auth.currentUser.email:'';
-    c='<h2>Confirme seu e-mail</h2><p>Enviamos um link de confirmação para <b>'+esc(em)+'</b>. Abra o link e depois volte aqui.</p>'+erroHtml()+
-    '<div class="acts"><button class="btn gold" data-act="jaVerifiquei"'+(S.authBusy?' disabled':'')+'>Já confirmei</button><button class="btn ghost" data-act="reenviar">Reenviar e-mail</button></div>'+
-    '<button class="linkbtn" data-act="sair">Sair</button>';
-  }
-  else if(S.auth==='enroll'){
-    c='<h2>Cadastre seu celular</h2>';
-    if(S.enrollStep==='phone'){
-      c+='<p>Nos próximos acessos, vamos enviar um código por SMS para este número.</p>'+
-        '<form class="auth-form" data-form="enrollPhone" novalidate>'+
-        '<label class="f">Celular com DDD<input id="en-tel" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="(12) 99999-9999"></label>'+
-        erroHtml()+btnSubmit('Enviar código')+'</form>';
-    } else {
-      c+='<p>Enviamos um código para <b>'+esc(S.telefone)+'</b>. Digite abaixo para concluir.</p>'+
-        '<form class="auth-form" data-form="enrollCode" novalidate>'+campoCodigo('en-code')+erroHtml()+btnSubmit('Confirmar celular')+'</form>'+
-        '<button class="linkbtn" data-act="trocarNumero">Trocar número</button>';
-    }
-    c+='<button class="linkbtn" data-act="sair">Sair</button>';
-  }
   return '<section class="entry"><div class="entry-card auth-card"><div class="entry-copy">'+c+'</div>'+HERO+'</div></section>';
 }
 
@@ -671,106 +787,18 @@ function pararDados(){
 }
 function markLoaded(k){S.loaded[k]=true;if(S.loaded.alunos&&S.loaded.treinos&&S.loaded.progresso)S.ready=true;}
 
-/* reCAPTCHA invisível exigido pelo Firebase para enviar SMS */
-function pegarRecaptcha(){
-  if(!recaptcha)recaptcha=new RecaptchaVerifier(auth,'recaptcha',{size:'invisible'});
-  return recaptcha;
-}
-function resetarRecaptcha(){try{if(recaptcha)recaptcha.clear();}catch(e){}recaptcha=null;var el=$('#recaptcha');if(el)el.innerHTML='';}
-function normalizarTel(v){
-  var d=String(v||'').replace(/\D/g,'');
-  if(d.indexOf('55')===0&&(d.length===12||d.length===13))return '+'+d;
-  if(d.length===10||d.length===11)return '+55'+d;
-  return null;
-}
-function formatarTel(e164){
-  var d=e164.replace(/^\+55/,'');
-  return d.length===11?'('+d.slice(0,2)+') '+d.slice(2,7)+'-'+d.slice(7):'('+d.slice(0,2)+') '+d.slice(2,6)+'-'+d.slice(6);
-}
-
 function avaliarUsuario(user){
-  if(!user){pararDados();if(S.auth!=='mfa'){S.auth='login';}render();return;}
-  if(multiFactor(user).enrolledFactors.length){S.auth='ok';S.authErr='';iniciarDados();render();return;}
-  pararDados();
-  if(!user.emailVerified){
-    S.auth='verify';
-    if(!S.verifEnviado){S.verifEnviado=true;sendEmailVerification(user).catch(function(e){S.authErr=msgErro(e);render();});}
-    render();return;
-  }
-  S.auth='enroll';S.enrollStep='phone';S.verificationId=null;S.authErr='';S.focus='#en-tel';render();
+  if(user){S.auth='ok';S.authErr='';iniciarDados();}
+  else{pararDados();S.auth='login';}
+  render();
 }
 async function fazerLogin(){
   var email=($('#lg-email').value||'').trim(),senha=$('#lg-senha').value||'';
   if(!email||!senha){S.authErr='Preencha e-mail e senha.';render();return;}
   S.authBusy=true;S.authErr='';render();
-  try{await signInWithEmailAndPassword(auth,email,senha);S.authBusy=false;render();}
-  catch(e){
-    S.authBusy=false;
-    if(e&&e.code==='auth/multi-factor-auth-required'){
-      S.resolver=getMultiFactorResolver(auth,e);S.auth='mfa';enviarSmsLogin();return;
-    }
-    S.authErr=msgErro(e);render();
-  }
-}
-async function enviarSmsLogin(){
-  var hint=S.resolver&&S.resolver.hints.find(function(h){return h.factorId===PhoneMultiFactorGenerator.FACTOR_ID;});
-  if(!hint){S.authErr='Esta conta não tem celular cadastrado.';render();return;}
-  S.dicaTel=hint.phoneNumber||'cadastrado';S.verificationId=null;S.authBusy=true;S.authErr='';render();
-  try{
-    S.verificationId=await new PhoneAuthProvider(auth).verifyPhoneNumber({multiFactorHint:hint,session:S.resolver.session},pegarRecaptcha());
-    S.focus='#mfa-code';
-  }catch(e){S.authErr=msgErro(e);resetarRecaptcha();}
+  try{await signInWithEmailAndPassword(auth,email,senha);}
+  catch(e){S.authErr=msgErro(e);}
   S.authBusy=false;render();
-}
-function lerCodigo(id){return (($(id)||{}).value||'').replace(/\D/g,'');}
-async function confirmarMfa(){
-  var code=lerCodigo('#mfa-code');
-  if(code.length!==6){S.authErr='Digite os 6 dígitos do código.';render();return;}
-  S.authBusy=true;S.authErr='';render();
-  try{
-    await S.resolver.resolveSignIn(PhoneMultiFactorGenerator.assertion(PhoneAuthProvider.credential(S.verificationId,code)));
-    S.resolver=null;S.verificationId=null;resetarRecaptcha();
-  }catch(e){S.authErr=msgErro(e);}
-  S.authBusy=false;render();
-}
-async function enviarSmsCadastro(){
-  var tel=normalizarTel(($('#en-tel')||{}).value);
-  if(!tel){S.authErr='Digite o celular com DDD, por exemplo (12) 99999-9999.';render();return;}
-  S.authBusy=true;S.authErr='';render();
-  try{
-    var session=await multiFactor(auth.currentUser).getSession();
-    S.verificationId=await new PhoneAuthProvider(auth).verifyPhoneNumber({phoneNumber:tel,session:session},pegarRecaptcha());
-    S.telefone=formatarTel(tel);S.enrollStep='code';S.focus='#en-code';
-  }catch(e){
-    resetarRecaptcha();
-    if(e&&e.code==='auth/requires-recent-login'){await signOut(auth);S.auth='login';}
-    S.authErr=msgErro(e);
-  }
-  S.authBusy=false;render();
-}
-async function confirmarCadastro(){
-  var code=lerCodigo('#en-code');
-  if(code.length!==6){S.authErr='Digite os 6 dígitos do código.';render();return;}
-  S.authBusy=true;S.authErr='';render();
-  try{
-    await multiFactor(auth.currentUser).enroll(PhoneMultiFactorGenerator.assertion(PhoneAuthProvider.credential(S.verificationId,code)),'Celular');
-    S.verificationId=null;S.enrollStep='phone';S.authBusy=false;resetarRecaptcha();
-    await signOut(auth);
-    S.auth='login';toast('Celular cadastrado. Entre de novo para receber o código por SMS.');
-  }catch(e){S.authErr=msgErro(e);S.authBusy=false;}
-  render();
-}
-async function jaVerifiquei(){
-  var u=auth.currentUser;if(!u)return;
-  S.authBusy=true;render();
-  try{await u.reload();}catch(e){}
-  S.authBusy=false;
-  if(!auth.currentUser.emailVerified){S.authErr='Ainda não identificamos a confirmação. Abra o link do e-mail e tente de novo.';render();return;}
-  S.authErr='';avaliarUsuario(auth.currentUser);
-}
-async function reenviar(){
-  try{await sendEmailVerification(auth.currentUser);toast('E-mail de confirmação reenviado.');}
-  catch(e){S.authErr=msgErro(e);render();}
 }
 async function esqueci(){
   var el=$('#lg-email'),email=el?(el.value||'').trim():'';
@@ -780,16 +808,13 @@ async function esqueci(){
   render();
 }
 async function sair(){
-  S.resolver=null;S.verificationId=null;S.enrollStep='phone';S.authErr='';S.verifEnviado=false;S.authBusy=false;
-  resetarRecaptcha();pararDados();S.auth=CONFIG_OK?'login':'config';
+  S.authErr='';S.authBusy=false;pararDados();S.auth=CONFIG_OK?'login':'config';
   try{if(auth)await signOut(auth);}catch(e){}
   render();
 }
 document.addEventListener('submit',function(ev){
-  var f=ev.target.dataset&&ev.target.dataset.form;if(!f)return;
-  ev.preventDefault();if(S.authBusy)return;
-  if(f==='login')fazerLogin();else if(f==='mfa')confirmarMfa();
-  else if(f==='enrollPhone')enviarSmsCadastro();else if(f==='enrollCode')confirmarCadastro();
+  var f=ev.target.dataset&&ev.target.dataset.form;if(f!=='login')return;
+  ev.preventDefault();if(!S.authBusy)fazerLogin();
 });
 
 /* ---------- boot ---------- */
