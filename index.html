@@ -298,6 +298,22 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .imp-check{display:flex;align-items:center;gap:10px;background:none;border:0;padding:6px 0;text-align:left;font-weight:600;min-height:44px}
 .imp-check .box{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;box-shadow:inset 0 0 0 2px var(--line);color:transparent;font-size:.8rem;flex:none}
 .imp-check[aria-pressed="true"] .box{background:var(--gold);box-shadow:none;color:var(--navy)}
+
+/* perfis e usuários */
+.role-chip{font-size:.8rem;font-weight:700;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:.3rem .75rem;white-space:nowrap}
+.badge{display:inline-grid;place-items:center;min-width:20px;height:20px;margin-left:6px;padding:0 6px;border-radius:999px;background:var(--gold);color:var(--navy);font-size:.75rem;font-weight:800}
+.u-alerta{background:#FBEFC9;color:#6B4500;border-radius:14px;padding:.7rem 1rem;font-weight:700}
+.ulist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.ucard{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow-sm)}
+.uhead{display:flex;align-items:center;gap:12px;min-width:0}
+.uhead .ainfo{flex:1}
+.u-tag{flex:none;font-size:.78rem;font-weight:700;border-radius:999px;padding:.15rem .6rem}
+.u-tag.warn{background:#FBEFC9;color:#8A5A00}
+.ugrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.ucard select{appearance:none;-webkit-appearance:none;background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235C636E' stroke-width='2' fill='none'/%3E%3C/svg%3E") no-repeat right 14px center;padding-right:36px;cursor:pointer}
+.ucard select:disabled{opacity:.6;cursor:not-allowed}
+.u-nota{font-size:.85rem}
+@media (max-width:760px){.role-chip{display:none}}
 </style>
 
 
@@ -309,7 +325,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 <script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut,sendPasswordResetEmail} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import {getDatabase,ref,set,remove,onValue} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+import {getDatabase,ref,set,remove,onValue,get,update} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
 /* ====== CONFIGURAÇÃO DO FIREBASE ======
    Cole aqui os valores de: Console do Firebase > Configurações do projeto > Seus apps > App da Web > firebaseConfig */
@@ -385,7 +401,7 @@ function iniciais(n){var p=String(n||'').trim().split(/\s+/);var r=((p[0]||'')[0
 function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 function saveSession(){lsSet('mf.session',JSON.stringify({papel:S.papel,alunoId:S.alunoId}));}
-function loadSession(){try{var s=JSON.parse(lsGet('mf.session')||'null');if(s){S.papel=s.papel||null;S.alunoId=s.alunoId||null;}}catch(e){}}
+function loadSession(){}
 function saveLocal(){lsSet('mf.data',JSON.stringify({alunos:S.alunos,treinos:S.treinos,progresso:S.progresso}));}
 function loadLocal(){
   var d=null;try{d=JSON.parse(lsGet('mf.data')||'null');}catch(e){}
@@ -464,11 +480,13 @@ function zerar(treinoId){
 /* ---------- views ---------- */
 function header(){
   var right='';
-  if(S.auth==='ok'&&S.papel){
-    right='<div class="seg" role="group" aria-label="Modo">'+
-      '<button data-act="papel" data-v="personal" aria-pressed="'+(S.papel==='personal')+'">Personal</button>'+
-      '<button data-act="papel" data-v="aluno" aria-pressed="'+(S.papel==='aluno')+'">Aluno</button></div>';
+  if(S.auth==='ok'&&S.me&&S.me.papel==='admin'&&S.ready){
+    var np=S.usuarios.filter(function(u){return u.papel==='pendente';}).length;
+    right='<div class="seg" role="group" aria-label="Área">'+
+      '<button data-act="aba" data-v="treinos" aria-pressed="'+(S.aba!=='usuarios')+'">Treinos</button>'+
+      '<button data-act="aba" data-v="usuarios" aria-pressed="'+(S.aba==='usuarios')+'">Usuários'+(np?'<span class="badge">'+np+'</span>':'')+'</button></div>';
   }
+  if(S.auth==='ok'&&S.me)right+='<span class="role-chip">'+esc(PAPEIS[S.me.papel]||'')+'</span>';
   if(S.auth==='ok')right='<div class="acts">'+right+'<button class="btn ghost sm" data-act="sair">Sair</button></div>';
   return '<header class="top"><div class="brand"><span class="logo">MF</span>MF Treinos</div>'+right+'</header>';
 }
@@ -617,7 +635,7 @@ function escolherAluno(){
 }
 function aluno(){
   var a=alunoAtual();
-  if(!a)return escolherAluno();
+  if(!a)return semVinculo();
   var ts=treinosDe(a.id),hoje=new Date().getDay();
   var cur=ts.find(function(t){return t.id===S.selTreino;});
   if(!cur){cur=ts.find(function(t){return t.dias.indexOf(hoje)>-1;})||ts[0]||null;}
@@ -625,7 +643,7 @@ function aluno(){
   var treinoHoje=ts.find(function(t){return t.dias.indexOf(hoje)>-1;});
   var h='<section class="panel"><div class="phero"><div class="phero-top"><div class="who"><span class="avatar lg">'+iniciais(a.nome)+'</span><div><div class="kicker">Olá, '+esc(a.nome.split(' ')[0])+'</div>'+
     '<h2>'+(treinoHoje?'Hoje é dia de treino.':ts.length?'Seus treinos da semana.':'Seu treino vem aí.')+'</h2></div></div>'+
-    '<button class="btn ghost sm" data-act="trocarAluno">Trocar aluno</button></div>';
+    '</div>';
   if(!ts.length){
     return h+'</div><div class="empty"><h3>Ainda sem treino</h3><p class="muted">Seu personal ainda não montou um treino para você. Assim que ele salvar, aparece aqui.</p></div></section>';
   }
@@ -656,6 +674,49 @@ function aluno(){
   return h+'</section>';
 }
 
+/* ---------- perfis ---------- */
+var PAPEIS={pendente:'Pendente',aluno:'Aluno',personal:'Personal',admin:'Administrativo'};
+var ORDEM_PAPEL={pendente:0,admin:1,personal:2,aluno:3};
+function nomeUsuario(u){return (u&&u.nome)||((u&&u.email)||'').split('@')[0]||'Sem nome';}
+function semVinculo(){
+  return '<section class="panel"><div class="empty"><h2>Quase lá</h2><p class="muted">Seu acesso de aluno está liberado, mas ainda não foi ligado ao seu cadastro de treinos. Peça ao administrativo para fazer o vínculo.</p></div></section>';
+}
+function erroPerfil(){
+  return '<section class="panel"><div class="empty"><h2>Sem acesso ao perfil</h2><p class="muted">O banco de dados recusou a leitura do seu perfil. Confira se as regras do Realtime Database incluem o nó <b>usuarios</b>.</p><button class="btn" data-act="sair">Sair</button></div></section>';
+}
+function pendenteView(){
+  var tem=!!(S.me.nome||'').trim();
+  var c='<h2>Acesso em análise</h2><p>Sua conta <b>'+esc(S.me.email)+'</b> foi criada. Agora o administrativo precisa definir se você é aluno ou personal. Esta tela atualiza sozinha quando o acesso for liberado.</p>'+
+    '<form class="auth-form" data-form="nome" novalidate><label class="f">'+(tem?'Seu nome':'Como você se chama?')+'<input id="pf-nome" autocomplete="name" value="'+esc(S.me.nome||'')+'" placeholder="Nome e sobrenome"></label>'+
+    '<button type="submit" class="btn gold">'+(tem?'Atualizar nome':'Salvar nome')+'</button></form>';
+  return '<section class="entry"><div class="entry-card auth-card"><div class="entry-copy">'+c+'</div>'+HERO+'</div></section>';
+}
+function usuariosView(){
+  var us=S.usuarios.slice().sort(function(a,b){return (ORDEM_PAPEL[a.papel]||0)-(ORDEM_PAPEL[b.papel]||0)||nomeUsuario(a).localeCompare(nomeUsuario(b));});
+  var np=us.filter(function(u){return u.papel==='pendente';}).length;
+  var alunosOrd=S.alunos.slice().sort(function(a,b){return a.nome.localeCompare(b.nome);});
+  var h='<section class="panel"><div><div class="eyebrow">Administrativo</div><h2>Usuários e acessos</h2>'+
+    '<p class="muted" style="margin-top:6px">Escolha o perfil de cada pessoa que entrou no app. Quem é aluno precisa estar ligado ao cadastro de treinos dele.</p></div>';
+  if(np)h+='<div class="u-alerta">'+np+(np===1?' pessoa aguardando':' pessoas aguardando')+' liberação.</div>';
+  if(!us.length)h+='<div class="empty"><p class="muted">Ninguém entrou no app ainda.</p></div>';
+  h+='<ul class="ulist">'+us.map(function(u){
+    var eu=u.id===S.me.uid;
+    var sel='<label class="f">Perfil<select data-uact="papel" data-uid="'+esc(u.id)+'"'+(eu?' disabled':'')+'>'+
+      ['pendente','aluno','personal','admin'].map(function(pp){return '<option value="'+pp+'"'+(u.papel===pp?' selected':'')+'>'+PAPEIS[pp]+'</option>';}).join('')+'</select></label>';
+    var vin='';
+    if(u.papel==='aluno'){
+      vin='<label class="f">Cadastro de treinos<select data-uact="vinculo" data-uid="'+esc(u.id)+'">'+
+        '<option value=""'+(u.alunoId?'':' selected')+'>Escolha o aluno…</option>'+
+        alunosOrd.map(function(a){return '<option value="'+esc(a.id)+'"'+(u.alunoId===a.id?' selected':'')+'>'+esc(a.nome)+'</option>';}).join('')+
+        '<option value="__novo">+ Criar cadastro com o nome "'+esc(nomeUsuario(u))+'"</option></select></label>';
+    }
+    var aviso=u.papel==='aluno'&&!(u.alunoId&&alunoPorId(u.alunoId))?'<span class="u-tag warn">Sem cadastro ligado</span>':u.papel==='pendente'?'<span class="u-tag warn">Aguardando</span>':'';
+    return '<li class="ucard"><div class="uhead"><span class="avatar">'+iniciais(nomeUsuario(u))+'</span><div class="ainfo"><b>'+esc(nomeUsuario(u))+(eu?' <span class="ex-tag">você</span>':'')+'</b><small>'+esc(u.email||'')+'</small></div>'+aviso+'</div>'+
+      '<div class="ugrid">'+sel+vin+'</div>'+(eu?'<p class="muted u-nota">Você não pode mudar o próprio perfil. Outro administrativo pode fazer isso.</p>':'')+'</li>';
+  }).join('')+'</ul></section>';
+  return h;
+}
+
 /* ---------- render ---------- */
 function render(){
   var app=$('#app');
@@ -664,16 +725,19 @@ function render(){
   if(active&&document.activeElement.selectionStart!=null){selS=document.activeElement.selectionStart;selE=document.activeElement.selectionEnd;}
   var body;
   if(S.auth!=='ok')body=authView();
+  else if(S.perfilStatus==='erro')body=erroPerfil();
+  else if(S.perfilStatus!=='ok')body='<div class="loading">Carregando…</div>';
+  else if(S.me.papel==='pendente')body=pendenteView();
   else if(S.dbErro)body='<section class="panel"><div class="empty"><h2>Sem acesso aos dados</h2><p class="muted">Você entrou, mas o banco recusou o acesso. Confira as regras do Realtime Database no Firebase.</p><button class="btn" data-act="sair">Sair</button></div></section>';
   else if(!S.ready)body='<div class="loading">Carregando…</div>';
-  else if(!S.papel)body=picker();
-  else if(S.papel==='personal')body=personal();
-  else body=aluno();
+  else if(S.me.papel==='aluno')body=aluno();
+  else if(S.me.papel==='admin'&&S.aba==='usuarios')body=usuariosView();
+  else body=personal();
   app.innerHTML=header()+body;
-  var vk=S.auth+'|'+(S.ready?1:0)+'|'+S.papel+'|'+(S.editor?1:0)+(S.importar?'i':'')+'|'+S.sel+'|'+S.alunoId;
+  var vk=S.auth+'|'+(S.ready?1:0)+'|'+(S.me?S.me.papel:'')+S.aba+'|'+(S.editor?1:0)+(S.importar?'i':'')+'|'+S.sel+'|'+S.alunoId;
   if(vk!==render._k){render._k=vk;app.classList.add('enter');clearTimeout(render._t);render._t=setTimeout(function(){app.classList.remove('enter');},500);}
   Array.prototype.forEach.call(app.querySelectorAll('input[id]'),function(el){
-    if(el.id in saved&&(el.id==='novo-nome'||el.id==='novo-obj'||/^(lg|imp)-/.test(el.id))&&el.value!==saved[el.id])el.value=saved[el.id];
+    if(el.id in saved&&(el.id==='novo-nome'||el.id==='novo-obj'||/^(lg|imp|pf)-/.test(el.id))&&el.value!==saved[el.id])el.value=saved[el.id];
   });
   if(S.focus){var f=$(S.focus);if(f)f.focus();S.focus=null;}
   else if(active){var el=document.getElementById(active);if(el){el.focus();if(selS!=null){try{el.setSelectionRange(selS,selE);}catch(e){}}}}
@@ -686,7 +750,8 @@ document.addEventListener('click',function(ev){
   var b=ev.target.closest('[data-act]');if(!b||b.disabled)return;
   var act=b.dataset.act,d=b.dataset;
   switch(act){
-    case 'papel':S.papel=d.v;S.editor=null;S.importar=null;S.confirm=null;saveSession();break;
+    case 'aba':if(S.me&&S.me.papel==='admin'){S.aba=d.v;S.editor=null;S.importar=null;S.confirm=null;}break;
+    case 'salvarNome':salvarNome();return;
     case 'selAluno':S.sel=d.id;S.editor=null;S.importar=null;S.confirm=null;break;
     case 'addAluno':addAluno();return;
     case 'delAlunoAsk':S.confirm='a:'+d.id;break;
@@ -702,8 +767,6 @@ document.addEventListener('click',function(ev){
     case 'addEx':S.editor.exercicios.push(blankEx());S.focus='#ex-'+(S.editor.exercicios.length-1)+'-nome';break;
     case 'rmEx':S.editor.exercicios.splice(+d.i,1);if(!S.editor.exercicios.length)S.editor.exercicios.push(blankEx());break;
     case 'mvEx':var x=+d.i,y=x+(+d.dir),L=S.editor.exercicios;if(y>=0&&y<L.length){var tmp=L[x];L[x]=L[y];L[y]=tmp;}break;
-    case 'escolheAluno':S.alunoId=d.id;S.selTreino=null;saveSession();break;
-    case 'trocarAluno':S.alunoId=null;saveSession();break;
     case 'selTreino':S.selTreino=d.id;break;
     case 'selDia':var t=treinosDe(S.alunoId).find(function(z){return z.dias.indexOf(+d.d)>-1;});if(t)S.selTreino=t.id;break;
     case 'toggleEx':toggleEx(d.t,d.e);break;
@@ -733,7 +796,7 @@ document.addEventListener('keydown',function(ev){
 });
 
 /* ---------- autenticação (e-mail e senha) ---------- */
-Object.assign(S,{auth:'loading',authErr:'',authBusy:false,dbErro:false});
+Object.assign(S,{auth:'loading',authErr:'',authBusy:false,dbErro:false,me:null,perfilStatus:null,usuarios:[],aba:'treinos'});
 var CONFIG_OK=firebaseConfig.apiKey&&firebaseConfig.apiKey.indexOf('COLE_')!==0;
 var app=null,auth=null,rtdb=null,unsubs=[];
 var HERO='<div class="hero-bar" aria-hidden="true"><svg viewBox="0 0 500 200"><rect x="10" y="94" width="480" height="12" rx="6" fill="var(--steel)"/><rect x="140" y="86" width="12" height="28" rx="3" fill="var(--ink)"/><rect x="348" y="86" width="12" height="28" rx="3" fill="var(--ink)"/><rect class="pl l1" style="--from:-30px" x="118" y="25" width="20" height="150" rx="6" fill="var(--p-red)"/><rect class="pl l2" style="--from:-30px" x="94" y="25" width="20" height="150" rx="6" fill="var(--p-blue)"/><rect class="pl l3" style="--from:-30px" x="72" y="40" width="18" height="120" rx="6" fill="var(--p-yellow)"/><rect class="pl l4" style="--from:-30px" x="54" y="54" width="14" height="92" rx="6" fill="var(--p-green)"/><rect class="pl r1" style="--from:30px" x="362" y="25" width="20" height="150" rx="6" fill="var(--p-red)"/><rect class="pl r2" style="--from:30px" x="386" y="25" width="20" height="150" rx="6" fill="var(--p-blue)"/><rect class="pl r3" style="--from:30px" x="410" y="40" width="18" height="120" rx="6" fill="var(--p-yellow)"/><rect class="pl r4" style="--from:30px" x="432" y="54" width="14" height="92" rx="6" fill="var(--p-green)"/></svg></div>';
@@ -787,11 +850,82 @@ function pararDados(){
 }
 function markLoaded(k){S.loaded[k]=true;if(S.loaded.alunos&&S.loaded.treinos&&S.loaded.progresso)S.ready=true;}
 
-function avaliarUsuario(user){
-  if(user){S.auth='ok';S.authErr='';iniciarDados();}
-  else{pararDados();S.auth='login';}
+var perfilUnsub=null,usuariosUnsub=null,criandoPerfil=false;
+function pararPerfil(){if(perfilUnsub){try{perfilUnsub();}catch(e){}}perfilUnsub=null;S.me=null;S.perfilStatus=null;}
+function pararUsuarios(){if(usuariosUnsub){try{usuariosUnsub();}catch(e){}}usuariosUnsub=null;S.usuarios=[];}
+function iniciarUsuarios(){
+  if(usuariosUnsub)return;
+  usuariosUnsub=onValue(ref(rtdb,'usuarios'),function(s){
+    var v=s.val()||{};S.usuarios=Object.keys(v).map(function(k){var o=Object.assign({},v[k]);o.id=k;return o;});render();
+  },function(){usuariosUnsub=null;S.usuarios=[];toast('Não foi possível carregar a lista de usuários.');});
+}
+async function criarPerfil(user){
+  if(criandoPerfil)return;criandoPerfil=true;
+  var base={email:user.email||'',nome:'',criadoEm:Date.now()};
+  var primeiro=false;
+  /* o primeiro usuário do app vira administrativo; os demais entram como pendentes */
+  try{var snap=await get(ref(rtdb,'usuarios'));primeiro=!snap.exists();}catch(e){primeiro=true;}
+  try{
+    var ok=false;
+    if(primeiro){try{await set(ref(rtdb,'usuarios/'+user.uid),Object.assign({papel:'admin'},base));ok=true;}catch(e){}}
+    if(!ok)await set(ref(rtdb,'usuarios/'+user.uid),Object.assign({papel:'pendente'},base));
+  }catch(e){S.perfilStatus='erro';render();}
+  criandoPerfil=false;
+}
+function aplicarPerfil(uidAtual,v){
+  var papel=PAPEIS[v.papel]?v.papel:'pendente';
+  S.me={uid:uidAtual,email:v.email||'',nome:v.nome||'',papel:papel,alunoId:v.alunoId||null};
+  S.perfilStatus='ok';
+  if(papel==='pendente'){pararDados();pararUsuarios();}
+  else{
+    iniciarDados();
+    if(papel==='admin')iniciarUsuarios();else{pararUsuarios();S.aba='treinos';}
+  }
+  S.papel=papel==='aluno'?'aluno':papel==='pendente'?null:'personal';
+  S.alunoId=papel==='aluno'?S.me.alunoId:null;
   render();
 }
+function avaliarUsuario(user){
+  pararPerfil();pararUsuarios();
+  if(!user){pararDados();S.auth='login';render();return;}
+  S.auth='ok';S.authErr='';S.perfilStatus='loading';render();
+  perfilUnsub=onValue(ref(rtdb,'usuarios/'+user.uid),function(snap){
+    var v=snap.val();
+    if(!v){criarPerfil(user);return;}
+    aplicarPerfil(user.uid,v);
+  },function(){S.perfilStatus='erro';render();});
+}
+async function salvarNome(){
+  var n=(($('#pf-nome')||{}).value||'').trim();
+  if(!n){toast('Digite seu nome.');return;}
+  try{await set(ref(rtdb,'usuarios/'+S.me.uid+'/nome'),n);toast('Nome salvo.');}
+  catch(e){toast('Não foi possível salvar o nome.');}
+}
+async function mudarPapel(uidAlvo,papel){
+  var u=S.usuarios.find(function(x){return x.id===uidAlvo;});if(!u||uidAlvo===S.me.uid)return;
+  var dados={papel:papel};
+  if(papel==='aluno'){
+    var al=u.alunoId&&alunoPorId(u.alunoId);
+    if(!al){al=S.alunos.find(function(a){return a.nome.trim().toLowerCase()===nomeUsuario(u).trim().toLowerCase();});}
+    dados.alunoId=al?al.id:null;
+  } else dados.alunoId=null;
+  try{await update(ref(rtdb,'usuarios/'+uidAlvo),dados);toast(nomeUsuario(u)+' agora é '+PAPEIS[papel]+'.');}
+  catch(e){toast('Não foi possível mudar o perfil.');render();}
+}
+async function mudarVinculo(uidAlvo,alunoId){
+  var u=S.usuarios.find(function(x){return x.id===uidAlvo;});if(!u)return;
+  if(alunoId==='__novo'){
+    var a={id:uid(),nome:nomeUsuario(u),objetivo:'',criadoEm:Date.now()};
+    S.alunos.push(a);persist('alunos',a.id,strip(a));alunoId=a.id;
+  }
+  try{await update(ref(rtdb,'usuarios/'+uidAlvo),{alunoId:alunoId||null});toast('Cadastro de treinos ligado.');}
+  catch(e){toast('Não foi possível ligar o cadastro.');render();}
+}
+document.addEventListener('change',function(ev){
+  var el=ev.target;if(!el.dataset||!el.dataset.uact||!S.me||S.me.papel!=='admin')return;
+  if(el.dataset.uact==='papel')mudarPapel(el.dataset.uid,el.value);
+  else if(el.dataset.uact==='vinculo')mudarVinculo(el.dataset.uid,el.value);
+});
 async function fazerLogin(){
   var email=($('#lg-email').value||'').trim(),senha=$('#lg-senha').value||'';
   if(!email||!senha){S.authErr='Preencha e-mail e senha.';render();return;}
@@ -808,12 +942,14 @@ async function esqueci(){
   render();
 }
 async function sair(){
-  S.authErr='';S.authBusy=false;pararDados();S.auth=CONFIG_OK?'login':'config';
+  S.authErr='';S.authBusy=false;pararPerfil();pararUsuarios();pararDados();S.aba='treinos';S.papel=null;S.alunoId=null;S.auth=CONFIG_OK?'login':'config';
   try{if(auth)await signOut(auth);}catch(e){}
   render();
 }
 document.addEventListener('submit',function(ev){
-  var f=ev.target.dataset&&ev.target.dataset.form;if(f!=='login')return;
+  var f=ev.target.dataset&&ev.target.dataset.form;
+  if(f==='nome'){ev.preventDefault();salvarNome();return;}
+  if(f!=='login')return;
   ev.preventDefault();if(!S.authBusy)fazerLogin();
 });
 
